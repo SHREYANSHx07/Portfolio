@@ -41,7 +41,7 @@ export function Nav() {
         className={cn(
           "flex w-full max-w-6xl items-center justify-between rounded-full border px-4 py-2.5 transition-colors duration-500 sm:px-6",
           scrolled
-            ? "border-line/80 bg-surface/70 backdrop-blur-xl"
+            ? "border-line/80 bg-surface/90 backdrop-blur-xl"
             : "border-transparent bg-transparent",
         )}
       >

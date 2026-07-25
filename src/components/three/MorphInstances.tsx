@@ -73,32 +73,32 @@ function buildFormations() {
   const about = makeFormation();
   for (let i = 0; i < N; i++) {
     about.pos.set(
-      [(rnd(i, 1) - 0.5) * 7.5, (rnd(i, 2) - 0.5) * 4.2, -1.2 - rnd(i, 3) * 2],
+      [(rnd(i, 1) - 0.5) * 8.5, (rnd(i, 2) - 0.5) * 4.4, -2.8 - rnd(i, 3) * 2.2],
       i * 3,
     );
-    about.scale[i] = 0.05 + rnd(i, 4) * 0.09;
+    about.scale[i] = 0.04 + rnd(i, 4) * 0.06;
     setColor(about, i, PALETTE[i % 3]);
   }
-  about.opacity = 0.5;
+  about.opacity = 0.32;
   about.tumble = 1;
   F.about = about;
 
   // — skills: fibonacci-sphere constellation in the section's left column
   const sk = makeFormation();
   const golden = Math.PI * (3 - Math.sqrt(5));
-  const R = 1.45;
+  const R = 1.35;
   for (let i = 0; i < N; i++) {
     if (i < SKILL_COUNT) {
       const y = 1 - (i / (SKILL_COUNT - 1)) * 2;
       const r = Math.sqrt(Math.max(0, 1 - y * y));
       const th = golden * i;
-      sk.pos.set([-1.8 + Math.cos(th) * r * R, -0.1 + y * R, Math.sin(th) * r * R], i * 3);
+      sk.pos.set([-1.8 + Math.cos(th) * r * R, -0.3 + y * R, Math.sin(th) * r * R], i * 3);
       sk.scale[i] = 0.12 + skills[i].weight * 0.13;
       setColor(sk, i, accentHex(skills[i].accent));
     } else {
       // faint dust ring around the constellation
       const a = (i / (N - SKILL_COUNT)) * Math.PI * 2;
-      sk.pos.set([-1.8 + Math.cos(a) * 2.0, -0.1 + Math.sin(a * 1.7) * 1.3, -0.8], i * 3);
+      sk.pos.set([-1.8 + Math.cos(a) * 1.8, -0.3 + Math.sin(a * 1.7) * 1.1, -1.2], i * 3);
       sk.scale[i] = 0.03;
       setColor(sk, i, COLORS.mutedInk);
     }
@@ -116,7 +116,7 @@ function buildFormations() {
     ex.scale[i] = 0.055;
     setColor(ex, i, i % 5 === 0 ? COLORS.cobalt : COLORS.mutedInk);
   }
-  ex.opacity = 0.35;
+  ex.opacity = 0.28;
   ex.tumble = 0.3;
   F.experience = ex;
 
@@ -129,15 +129,15 @@ function buildFormations() {
     const base = left ? COLORS.cobalt : COLORS.coral;
     const j = Math.floor(i / 2);
     const a = (j / (N / 2)) * Math.PI * 2;
-    const rr = 1.1 + rnd(i, 9) * 0.5;
+    const rr = 1.0 + rnd(i, 9) * 0.45;
     fl.pos.set(
-      [cx + Math.cos(a) * rr, Math.sin(a * 1.3) * 1.2, -1.4 - rnd(i, 10) * 0.8],
+      [cx + Math.cos(a) * rr, Math.sin(a * 1.3) * 1.1, -2.4 - rnd(i, 10) * 1.4],
       i * 3,
     );
-    fl.scale[i] = j % 6 === 0 ? 0.13 : 0.05 + rnd(i, 11) * 0.05;
+    fl.scale[i] = j % 6 === 0 ? 0.1 : 0.04 + rnd(i, 11) * 0.04;
     setColor(fl, i, j % 4 === 0 ? COLORS.ink : base);
   }
-  fl.opacity = 0.5;
+  fl.opacity = 0.35;
   fl.tumble = 0.5;
   F.flagship = fl;
 
@@ -186,21 +186,21 @@ function buildFormations() {
   for (let r = 0; r < ROWS; r++) {
     const cols = ROWS - r;
     for (let c = 0; c < cols && k < 28; c++, k++) {
-      co.pos.set([1.7 + r * 0.26, 0.75 + (c - cols / 2) * 0.24, -0.2], k * 3);
-      co.scale[k] = 0.11;
+      co.pos.set([2.05 + r * 0.24, 1.5 + (c - cols / 2) * 0.22, -0.5], k * 3);
+      co.scale[k] = 0.1;
       setColor(co, k, r === 0 ? COLORS.coral : k % 3 === 0 ? COLORS.cobalt : COLORS.ink);
     }
   }
   for (let i = k; i < N; i++) {
     const t = (i - k) / (N - k);
     co.pos.set(
-      [1.7 - t * 4.5, 0.75 - Math.sin(t * Math.PI * 1.5) * 0.9, -0.4 - t],
+      [2.05 - t * 5.4, 1.5 + Math.sin(t * Math.PI) * 0.35, -1.2 - t * 1.4],
       i * 3,
     );
-    co.scale[i] = 0.035;
+    co.scale[i] = 0.028;
     setColor(co, i, COLORS.mutedInk);
   }
-  co.opacity = 0.9;
+  co.opacity = 0.75;
   co.tumble = 0.1;
   F.contact = co;
 

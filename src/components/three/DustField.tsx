@@ -78,7 +78,7 @@ export function DustField() {
         size={0.035}
         color={COLORS.mutedInk}
         transparent
-        opacity={0.38}
+        opacity={0.3}
         sizeAttenuation
         depthWrite={false}
       />
