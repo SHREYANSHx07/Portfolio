@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 
@@ -58,6 +58,34 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f1ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0c11" },
+  ],
+};
+
+// Structured data: lets search engines connect the site, the person and
+// the public profiles into one entity (rich-result eligibility).
+const PERSON_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Shreyansh Gupta",
+  jobTitle: "Backend & AI Engineer",
+  url: SITE,
+  email: "mailto:shreyansh1418@gmail.com",
+  worksFor: { "@type": "Organization", name: "ScopeX" },
+  alumniOf: { "@type": "CollegeOrUniversity", name: "Dr. APJ Abdul Kalam Technical University" },
+  knowsAbout: ["Backend Engineering", "AI/LLM Applications", "RAG", "Go", "Python", "Django"],
+  sameAs: [
+    "https://github.com/SHREYANSHx07",
+    "https://www.linkedin.com/in/shreyansh-tech/",
+    "https://leetcode.com/u/shreyansh0806/",
+    "https://codeforces.com/profile/shreyansh0806",
+    "https://www.codechef.com/users/shreyansh0806",
+  ],
+};
+
 // Runs before paint so a saved dark preference never flashes light.
 const THEME_INIT = `(function(){try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
 
@@ -74,6 +102,10 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSONLD) }}
+        />
       </head>
       <body className="grain min-h-full bg-paper text-ink">{children}</body>
     </html>

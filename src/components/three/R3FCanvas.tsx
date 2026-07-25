@@ -35,14 +35,46 @@ const CAM: Record<SectionId, { pos: Vec3; look: Vec3 }> = {
   contact: { pos: [0.5, 0.3, 6.5], look: [0.5, 0.3, 0] },
 };
 
+const SECTION_ORDER: SectionId[] = [
+  "hero",
+  "about",
+  "skills",
+  "experience",
+  "flagship",
+  "projects",
+  "achievements",
+  "contact",
+];
+
 const INTRO_FROM: Vec3 = [1.4, -0.3, 1.6]; // just in front of the sculpture core
+
+/**
+ * One continuous dolly move for the whole page: the old per-section stations
+ * become control points on a Catmull-Rom spline, and a damped parameter
+ * travels along it — so moving between sections swings THROUGH the
+ * intermediate viewpoints instead of cutting station-to-station.
+ */
+const POS_CURVE = new THREE.CatmullRomCurve3(
+  SECTION_ORDER.map((id) => new THREE.Vector3(...CAM[id].pos)),
+  false,
+  "centripetal",
+  0.5,
+);
+const LOOK_CURVE = new THREE.CatmullRomCurve3(
+  SECTION_ORDER.map((id) => new THREE.Vector3(...CAM[id].look)),
+  false,
+  "centripetal",
+  0.5,
+);
 
 function CameraRig() {
   const intro = useRef(0);
+  const u = useRef(0); // damped position along the spline, 0..1
+  const posV = useRef(new THREE.Vector3());
+  const lookV = useRef(new THREE.Vector3());
 
   useFrame((state, dt) => {
     const { section, pointer, ready } = useScrollStore.getState();
-    const station = CAM[section] ?? CAM.hero;
 
     // cinematic fly-in once the preloader lifts (~2s ease-out)
     if (ready && intro.current < 1) {
@@ -50,12 +82,20 @@ function CameraRig() {
     }
     const e = 1 - Math.pow(1 - intro.current, 3);
 
-    const tx = THREE.MathUtils.lerp(INTRO_FROM[0], station.pos[0] + pointer.x * 0.25, e);
-    const ty = THREE.MathUtils.lerp(INTRO_FROM[1], station.pos[1] - pointer.y * 0.2, e);
-    const tz = THREE.MathUtils.lerp(INTRO_FROM[2], station.pos[2], e);
+    // travel along the spline toward the active section's parameter
+    const idx = Math.max(SECTION_ORDER.indexOf(section), 0);
+    const targetU = idx / (SECTION_ORDER.length - 1);
+    u.current += (targetU - u.current) * (1 - Math.exp(-1.6 * dt));
 
-    easing.damp3(state.camera.position, [tx, ty, tz], 0.55, dt);
-    state.camera.lookAt(station.look[0], station.look[1], station.look[2]);
+    POS_CURVE.getPointAt(THREE.MathUtils.clamp(u.current, 0, 1), posV.current);
+    LOOK_CURVE.getPointAt(THREE.MathUtils.clamp(u.current, 0, 1), lookV.current);
+
+    const tx = THREE.MathUtils.lerp(INTRO_FROM[0], posV.current.x + pointer.x * 0.25, e);
+    const ty = THREE.MathUtils.lerp(INTRO_FROM[1], posV.current.y - pointer.y * 0.2, e);
+    const tz = THREE.MathUtils.lerp(INTRO_FROM[2], posV.current.z, e);
+
+    easing.damp3(state.camera.position, [tx, ty, tz], 0.5, dt);
+    state.camera.lookAt(lookV.current);
   });
   return null;
 }

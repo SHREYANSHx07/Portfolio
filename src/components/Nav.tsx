@@ -82,6 +82,14 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => window.dispatchEvent(new Event("palette:open"))}
+            aria-label="Open command palette"
+            data-cursor="⌘K"
+            className="hidden h-9 items-center gap-1.5 rounded-full border border-line/80 bg-surface/70 px-3 font-mono text-[11px] text-muted-ink backdrop-blur transition-colors hover:border-cobalt/60 hover:text-cobalt md:flex"
+          >
+            ⌘K
+          </button>
           <ThemeToggle />
           <MagneticButton strength={0.5}>
             <a

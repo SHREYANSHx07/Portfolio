@@ -5,8 +5,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import type { MotionValue } from "framer-motion";
-import { COLORS, accentHex } from "@/lib/theme";
+import { accentHex } from "@/lib/theme";
 import { useScrollStore } from "@/hooks/useScrollStore";
+import { useThemeStore } from "@/hooks/useTheme";
 import { projects, type Project } from "@/data/projects";
 
 /**
@@ -33,6 +34,7 @@ function Panel({
   const mat = useRef<THREE.MeshStandardMaterial>(null);
   const frameMat = useRef<THREE.MeshStandardMaterial>(null);
   const texture = useTexture(project.image!);
+  const theme = useThemeStore((s) => s.theme);
 
   useFrame((state, dt) => {
     if (!group.current) return;
@@ -72,9 +74,11 @@ function Panel({
           <planeGeometry args={[2.94, 1.9]} />
           <meshStandardMaterial
             ref={frameMat}
-            color={accentHex(project.accent)}
+            color={accentHex(project.accent, theme)}
             roughness={0.4}
             metalness={0.2}
+            emissive={theme === "dark" ? accentHex(project.accent, theme) : "#000000"}
+            emissiveIntensity={theme === "dark" ? 0.35 : 0}
             transparent
           />
         </mesh>
@@ -124,6 +128,7 @@ export function ProjectsGalleryCanvas({
   onOpen: (p: Project) => void;
 }) {
   const cam = useMemo(() => ({ position: [0, 0.1, 4.3] as [number, number, number], fov: 42 }), []);
+  const dark = useThemeStore((s) => s.theme === "dark");
 
   return (
     <Canvas
@@ -132,17 +137,25 @@ export function ProjectsGalleryCanvas({
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
     >
-      <hemisphereLight args={["#fff7ec", "#d8d2c6", 1.05]} />
-      <directionalLight position={[3, 4, 5]} intensity={1.5} color="#fff3e2" />
-      <directionalLight position={[-4, 1, 2]} intensity={0.4} color="#d9e2ff" />
+      {/* lights mirror the main scene's rig per theme so the gallery
+          sits in the same world (no hardcoded ground plane — a wide
+          translucent slab read as a glitch band over the page) */}
+      {dark ? (
+        <>
+          <hemisphereLight args={["#46538f", "#07080d", 0.8]} />
+          <directionalLight position={[3, 4, 5]} intensity={1.1} color="#c9d4ff" />
+          <directionalLight position={[-4, 1, 2]} intensity={0.35} color="#ff8a6a" />
+        </>
+      ) : (
+        <>
+          <hemisphereLight args={["#fff7ec", "#d8d2c6", 1.05]} />
+          <directionalLight position={[3, 4, 5]} intensity={1.5} color="#fff3e2" />
+          <directionalLight position={[-4, 1, 2]} intensity={0.4} color="#d9e2ff" />
+        </>
+      )}
       <Suspense fallback={null}>
         <Rig progress={progress} onOpen={onOpen} />
       </Suspense>
-      {/* soft ground hint */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.35, 0]}>
-        <planeGeometry args={[20, 6]} />
-        <meshStandardMaterial color={COLORS.paper} transparent opacity={0.35} />
-      </mesh>
     </Canvas>
   );
 }

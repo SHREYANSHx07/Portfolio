@@ -3,7 +3,8 @@
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { COLORS } from "@/lib/theme";
+import { palette } from "@/lib/theme";
+import { useThemeStore } from "@/hooks/useTheme";
 
 /**
  * A low-poly paper plane that loops a gentle launch arc — shown in the contact
@@ -11,6 +12,8 @@ import { COLORS } from "@/lib/theme";
  */
 function PlaneMesh() {
   const group = useRef<THREE.Group>(null);
+  const theme = useThemeStore((s) => s.theme);
+  const C = palette(theme);
 
   // Two wings + belly fold, as a small custom geometry.
   const geom = useMemo(() => {
@@ -47,7 +50,7 @@ function PlaneMesh() {
     <group ref={group}>
       <mesh geometry={geom} castShadow>
         <meshStandardMaterial
-          color={COLORS.surface}
+          color={theme === "dark" ? "#e6e4f0" : C.surface}
           side={THREE.DoubleSide}
           roughness={0.5}
           metalness={0}
@@ -56,13 +59,14 @@ function PlaneMesh() {
       </mesh>
       {/* crease line */}
       <mesh geometry={geom}>
-        <meshBasicMaterial color={COLORS.cobalt} wireframe transparent opacity={0.25} />
+        <meshBasicMaterial color={C.cobalt} wireframe transparent opacity={0.25} />
       </mesh>
     </group>
   );
 }
 
 export function PaperPlaneCanvas() {
+  const dark = useThemeStore((s) => s.theme === "dark");
   return (
     <Canvas
       dpr={[1, 1.8]}
@@ -70,8 +74,17 @@ export function PaperPlaneCanvas() {
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
     >
-      <hemisphereLight args={["#fff7ec", "#d8d2c6", 1.1]} />
-      <directionalLight position={[3, 5, 4]} intensity={1.6} color="#fff3e2" />
+      {dark ? (
+        <>
+          <hemisphereLight args={["#46538f", "#07080d", 0.8]} />
+          <directionalLight position={[3, 5, 4]} intensity={1.2} color="#c9d4ff" />
+        </>
+      ) : (
+        <>
+          <hemisphereLight args={["#fff7ec", "#d8d2c6", 1.1]} />
+          <directionalLight position={[3, 5, 4]} intensity={1.6} color="#fff3e2" />
+        </>
+      )}
       <PlaneMesh />
     </Canvas>
   );

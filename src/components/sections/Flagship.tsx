@@ -9,6 +9,8 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { AgentPlayground } from "@/components/ui/AgentPlayground";
+import { ArchDiagram } from "@/components/ui/ArchDiagram";
 import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
@@ -62,7 +64,13 @@ function TiltVisual({ product, flip }: { product: FlagshipProduct; flip: boolean
       style={{ rotateX: rx, rotateY: ry, transformPerspective: 1100 }}
       className="relative [transform-style:preserve-3d]"
     >
-      <div className="relative aspect-[3/2] overflow-hidden rounded-[1.5rem] border border-line bg-surface shadow-[0_40px_90px_-45px_rgba(26,26,26,0.45)]">
+      {/* shares a layoutId with the modal header — opening the case study
+          morphs this screenshot into the modal instead of fading over it */}
+      <motion.div
+        layoutId={`flagship-visual-${product.id}`}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="relative aspect-[3/2] overflow-hidden rounded-[1.5rem] border border-line bg-surface shadow-[0_40px_90px_-45px_rgba(26,26,26,0.45)]"
+      >
         <Image
           src={product.image}
           alt={product.title}
@@ -70,7 +78,7 @@ function TiltVisual({ product, flip }: { product: FlagshipProduct; flip: boolean
           sizes="(max-width: 768px) 92vw, 45vw"
           className="object-cover"
         />
-      </div>
+      </motion.div>
 
       {/* floating fact badges at depth */}
       {badges.map((b, i) => (
@@ -109,18 +117,22 @@ function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: ()
     >
       <div className="absolute inset-0 bg-ink/45 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        initial={{ scale: 0.93, y: 24, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.96, y: 12, opacity: 0 }}
+        initial={{ y: 24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 12, opacity: 0 }}
         transition={{ duration: 0.45, ease: EASE }}
         className="relative z-10 flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
       >
         {/* header */}
         <div className="relative shrink-0">
-          <div className="relative aspect-[21/8]">
+          <motion.div
+            layoutId={`flagship-visual-${product.id}`}
+            transition={{ duration: 0.5, ease: EASE }}
+            className="relative aspect-[21/8] overflow-hidden"
+          >
             <Image src={product.image} alt={product.title} fill sizes="896px" className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
-          </div>
+          </motion.div>
           <button
             onClick={onClose}
             data-cursor="Close"
@@ -140,15 +152,21 @@ function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: ()
         <div data-lenis-prevent className="overflow-y-auto overscroll-contain px-6 pb-8 pt-5 sm:px-8">
           <p className="max-w-2xl text-[15px] leading-relaxed text-muted-ink">{product.description}</p>
 
-          {/* metrics */}
+          {/* metrics — 60ms stagger so the numbers land one after another */}
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {product.metrics.map((m) => (
-              <div key={m.label} className="rounded-2xl border border-line bg-paper p-4">
+            {product.metrics.map((m, i) => (
+              <motion.div
+                key={m.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.2 + i * 0.06, ease: EASE }}
+                className="rounded-2xl border border-line bg-paper p-4"
+              >
                 <p className={cn("font-display text-2xl", accentText)}>{m.value}</p>
                 <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-ink">
                   {m.label}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -156,6 +174,7 @@ function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: ()
           <h4 className="mt-8 font-mono text-xs uppercase tracking-[0.25em] text-muted-ink">
             Architecture
           </h4>
+          <ArchDiagram productId={product.id} />
           <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-muted-ink">
             {product.architecture.map((a, i) => (
               <li key={i} className="flex gap-3">
@@ -218,6 +237,9 @@ function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: ()
               </div>
             </>
           )}
+
+          {/* live sandbox — only on the AI-agent case study */}
+          {product.id === "ai-support-agent" && <AgentPlayground />}
 
           {/* incident war story */}
           {product.incident && (

@@ -92,7 +92,12 @@ function TiltCard({
           : "border-line opacity-35 saturate-50",
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden">
+      {/* shares a layoutId with the modal header (shared-element morph) */}
+      <motion.div
+        layoutId={`project-visual-${project.id}`}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="relative aspect-[16/10] overflow-hidden"
+      >
         <Image
           src={project.image!}
           alt={project.title}
@@ -101,7 +106,7 @@ function TiltCard({
           className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/10 to-transparent" />
-      </div>
+      </motion.div>
       <div className="flex flex-1 flex-col p-6" style={{ transform: "translateZ(30px)" }}>
         <div className="flex items-center justify-between">
           <span className={`font-mono text-[11px] uppercase tracking-widest ${accent}`}>
@@ -141,13 +146,17 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
     >
       <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        initial={{ scale: 0.92, y: 20, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.95, y: 10, opacity: 0 }}
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 10, opacity: 0 }}
         transition={{ duration: 0.4, ease: EASE }}
         className="relative z-10 flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
       >
-        <div className="relative aspect-[16/9] shrink-0">
+        <motion.div
+          layoutId={`project-visual-${project.id}`}
+          transition={{ duration: 0.5, ease: EASE }}
+          className="relative aspect-[16/9] shrink-0 overflow-hidden"
+        >
           <Image src={project.image!} alt={project.title} fill sizes="768px" className="object-cover" />
           <button
             onClick={onClose}
@@ -157,7 +166,7 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
           >
             ✕
           </button>
-        </div>
+        </motion.div>
         <div data-lenis-prevent className="min-h-0 overflow-y-auto overscroll-contain p-7">
           <h3 className="font-display text-2xl font-medium text-ink">{project.title}</h3>
           <p className="mt-1 text-sm text-cobalt">{project.tagline}</p>

@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { accentHex, palette, type Palette, type ThemeName } from "@/lib/theme";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
 import { useThemeStore } from "@/hooks/useTheme";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { skills } from "@/data/skills";
 import { stats } from "@/data/achievements";
 
@@ -243,6 +244,21 @@ export function MorphInstances() {
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const tmpColor = useMemo(() => new THREE.Color(), []);
+  const reduced = useReducedMotion();
+
+  // click shockwave: capture pointer NDC on pointerdown, stamp world coords
+  // + clock time on the next frame, then decay the impulse over ~1.1s
+  const burst = useRef({ nx: 0, ny: 0, wx: 0, wy: 0, at: -10, pending: false });
+  useEffect(() => {
+    if (reduced) return;
+    const onDown = (e: PointerEvent) => {
+      burst.current.nx = (e.clientX / window.innerWidth) * 2 - 1;
+      burst.current.ny = (e.clientY / window.innerHeight) * 2 - 1;
+      burst.current.pending = true;
+    };
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [reduced]);
 
   // line geometry built from the skills formation (static endpoints)
   const lineGeom = useMemo(() => {
@@ -267,13 +283,30 @@ export function MorphInstances() {
       };
     }
     const cur = curRef.current;
-    const { section, hoverSkill, skillFilter } = useScrollStore.getState();
+    const { section, hoverSkill, skillFilter, pointer } = useScrollStore.getState();
     const f = formations[section as SectionId] ?? formations.hero;
     const t = state.clock.elapsedTime;
 
     // narrow viewports: squeeze formation x toward center so nothing exits frame
     const aspect = size.width / size.height;
     const xf = THREE.MathUtils.clamp(aspect / 1.5, 0.4, 1);
+
+    // pointer NDC → approximate world coords at the z≈0 plane (same
+    // projection DustField uses, so both fields part around one cursor)
+    const halfH = Math.tan(THREE.MathUtils.degToRad(19)) * 6.6;
+    const px = pointer.x * halfH * aspect;
+    const py = -pointer.y * halfH;
+
+    // stamp a pending click with world coords + clock time
+    const b = burst.current;
+    if (b.pending) {
+      b.pending = false;
+      b.wx = b.nx * halfH * aspect;
+      b.wy = -b.ny * halfH;
+      b.at = t;
+    }
+    const burstAge = t - b.at;
+    const bursting = !reduced && burstAge >= 0 && burstAge < 1.1;
 
     const k = 1 - Math.exp(-3.2 * dt); // damping factor
     cur.opacity += (f.opacity - cur.opacity) * k;
@@ -287,7 +320,7 @@ export function MorphInstances() {
     for (let i = 0; i < N; i++) {
       // wobble keeps formations alive
       const wob = (0.05 + f.tumble * 0.1) * motionBoost;
-      const tx = f.pos[i * 3] * xf + Math.sin(t * 0.7 + i * 1.7) * wob;
+      let tx = f.pos[i * 3] * xf + Math.sin(t * 0.7 + i * 1.7) * wob;
       let ty = f.pos[i * 3 + 1] + Math.cos(t * 0.6 + i * 2.3) * wob;
       const tz = f.pos[i * 3 + 2];
       let ts = f.scale[i];
@@ -299,6 +332,34 @@ export function MorphInstances() {
           ty += 0.15;
         } else {
           ts *= 0.55;
+        }
+      }
+
+      // cursor repulsion: voxels quietly part around the pointer
+      if (!reduced) {
+        const dx = tx - px;
+        const dy = ty - py;
+        const d2 = dx * dx + dy * dy;
+        const R = 1.6;
+        if (d2 < R * R && d2 > 0.0001) {
+          const d = Math.sqrt(d2);
+          const force = (1 - d / R) * 0.7;
+          tx += (dx / d) * force;
+          ty += (dy / d) * force;
+        }
+      }
+
+      // click shockwave: an impulse ripples outward, then the formation
+      // re-forms on its own (targets never moved — damping pulls it home)
+      if (bursting) {
+        const dx = tx - b.wx;
+        const dy = ty - b.wy;
+        const d = Math.max(Math.sqrt(dx * dx + dy * dy), 0.2);
+        const RB = 3.2;
+        if (d < RB) {
+          const falloff = (1 - d / RB) * (1 - burstAge / 1.1);
+          tx += (dx / d) * falloff * 1.5;
+          ty += (dy / d) * falloff * 1.5;
         }
       }
 

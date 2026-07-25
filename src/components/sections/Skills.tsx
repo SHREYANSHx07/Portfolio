@@ -57,11 +57,19 @@ export function Skills() {
                 <div className="flex flex-wrap gap-2">
                   {skills
                     .filter((s) => s.category === cat)
-                    .map((s) => {
+                    .map((s, si) => {
                       const active = skillFilter === s.name;
                       return (
-                        <button
+                        <motion.button
                           key={s.name}
+                          initial={{ opacity: 0, y: 8 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: "-10% 0px" }}
+                          transition={{
+                            duration: 0.4,
+                            delay: ci * 0.08 + si * 0.035,
+                            ease: EASE,
+                          }}
                           data-cursor="hover"
                           onMouseEnter={() => setHoverSkill(s.name)}
                           onMouseLeave={() => setHoverSkill(null)}
@@ -74,7 +82,7 @@ export function Skills() {
                           )}
                         >
                           {s.name}
-                        </button>
+                        </motion.button>
                       );
                     })}
                 </div>

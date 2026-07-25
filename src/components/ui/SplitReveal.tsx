@@ -37,10 +37,14 @@ export function SplitReveal({
       transition: { staggerChildren: stagger, delayChildren: delay },
     },
   };
+  // blur softens the mask edge as each word rides up — a one-shot reveal,
+  // so the filter cost is a single paint per word, not a running cost
   const word: Variants = {
-    hidden: { y: "110%" },
+    hidden: { y: "110%", opacity: 0, filter: "blur(8px)" },
     show: {
       y: "0%",
+      opacity: 1,
+      filter: "blur(0px)",
       transition: { duration: 0.85, ease: EASE },
     },
   };

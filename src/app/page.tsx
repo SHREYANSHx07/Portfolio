@@ -1,6 +1,8 @@
 import { Providers } from "@/components/providers/Providers";
 import { CanvasClient } from "@/components/three/CanvasClient";
+import { AskDock } from "@/components/ui/AskDock";
 import { AuroraBackdrop } from "@/components/ui/AuroraBackdrop";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { Preloader } from "@/components/ui/Preloader";
 import { ScrollHUD } from "@/components/ui/ScrollHUD";
@@ -27,6 +29,8 @@ export default function Home() {
       <CustomCursor />
       <ScrollHUD />
       <Nav />
+      <AskDock />
+      <CommandPalette />
 
       <main className="relative">
         <Hero />
