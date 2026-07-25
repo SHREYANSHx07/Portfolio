@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { useGameStore } from "@/hooks/useGameStore";
 
 /**
  * "Ask my AI" — a floating RAG assistant dock. The bot answers questions
@@ -55,6 +56,7 @@ export function AskDock() {
   async function send(text: string) {
     const question = text.trim();
     if (!question || busy) return;
+    useGameStore.getState().unlock("inquisitive");
 
     const history: Msg[] = [...messages, { role: "user", content: question }];
     setMessages([...history, { role: "assistant", content: "" }]);

@@ -7,6 +7,8 @@ import { accentHex, palette, type Palette, type ThemeName } from "@/lib/theme";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
 import { useThemeStore } from "@/hooks/useTheme";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useGameStore } from "@/hooks/useGameStore";
+import { sfxBlip, sfxWhoosh } from "@/lib/sfx";
 import { skills } from "@/data/skills";
 import { stats } from "@/data/achievements";
 
@@ -249,12 +251,21 @@ export function MorphInstances() {
   // click shockwave: capture pointer NDC on pointerdown, stamp world coords
   // + clock time on the next frame, then decay the impulse over ~1.1s
   const burst = useRef({ nx: 0, ny: 0, wx: 0, wy: 0, at: -10, pending: false });
+  // per-voxel pop timestamps (clock seconds); popped voxels vanish + regrow
+  const poppedAt = useRef(new Float32Array(N).fill(-10));
+  const tmpProj = useMemo(() => new THREE.Vector3(), []);
+
   useEffect(() => {
     if (reduced) return;
     const onDown = (e: PointerEvent) => {
+      // ignore clicks on interactive UI — only "the void" fires the shockwave
+      if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea, [role=dialog]"))
+        return;
       burst.current.nx = (e.clientX / window.innerWidth) * 2 - 1;
       burst.current.ny = (e.clientY / window.innerHeight) * 2 - 1;
       burst.current.pending = true;
+      useGameStore.getState().unlock("first-contact");
+      sfxWhoosh();
     };
     window.addEventListener("pointerdown", onDown, { passive: true });
     return () => window.removeEventListener("pointerdown", onDown);
@@ -297,16 +308,43 @@ export function MorphInstances() {
     const px = pointer.x * halfH * aspect;
     const py = -pointer.y * halfH;
 
-    // stamp a pending click with world coords + clock time
+    // stamp a pending click with world coords + clock time, and test for a
+    // direct voxel hit (screen-space) — a hit pops that voxel
     const b = burst.current;
     if (b.pending) {
       b.pending = false;
       b.wx = b.nx * halfH * aspect;
       b.wy = -b.ny * halfH;
       b.at = t;
+
+      let hit = -1;
+      let hitDist = 0.055; // NDC hit radius
+      if (cur.opacity > 0.1) {
+        for (let i = 0; i < N; i++) {
+          if (cur.scale[i] < 0.05 || t - poppedAt.current[i] < 2) continue;
+          tmpProj
+            .set(cur.pos[i * 3], cur.pos[i * 3 + 1], cur.pos[i * 3 + 2])
+            .project(state.camera);
+          const dx = tmpProj.x - b.nx;
+          const dy = tmpProj.y - -b.ny;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < hitDist) {
+            hitDist = d;
+            hit = i;
+          }
+        }
+      }
+      if (hit >= 0) {
+        poppedAt.current[hit] = t;
+        useGameStore.getState().pop();
+        sfxBlip();
+      }
     }
     const burstAge = t - b.at;
     const bursting = !reduced && burstAge >= 0 && burstAge < 1.1;
+
+    // konami storm: five seconds of chaos, then the field re-forms itself
+    const storming = !reduced && Date.now() < useGameStore.getState().stormUntil;
 
     const k = 1 - Math.exp(-3.2 * dt); // damping factor
     cur.opacity += (f.opacity - cur.opacity) * k;
@@ -315,7 +353,7 @@ export function MorphInstances() {
     const inSkills = section === "skills";
 
     // the night field is livelier: stronger wobble, faster tumble
-    const motionBoost = dark ? 1.6 : 1;
+    const motionBoost = (dark ? 1.6 : 1) * (storming ? 5 : 1);
 
     for (let i = 0; i < N; i++) {
       // wobble keeps formations alive
@@ -347,6 +385,18 @@ export function MorphInstances() {
           tx += (dx / d) * force;
           ty += (dy / d) * force;
         }
+      }
+
+      // storm chaos: every voxel swirls on its own orbit + lifts skyward
+      if (storming) {
+        tx += Math.sin(t * 4.5 + i * 2.1) * 1.6;
+        ty += Math.cos(t * 3.7 + i * 1.3) * 1.2 + Math.sin(t * 8 + i) * 0.3;
+      }
+
+      // popped voxels blink out, then regrow in place
+      const popAge = t - poppedAt.current[i];
+      if (popAge >= 0 && popAge < 1.6) {
+        ts = popAge < 0.55 ? 0.0001 : ts * ((popAge - 0.55) / 1.05);
       }
 
       // click shockwave: an impulse ripples outward, then the formation

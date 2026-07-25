@@ -86,8 +86,9 @@ const PERSON_JSONLD = {
   ],
 };
 
-// Runs before paint so a saved dark preference never flashes light.
-const THEME_INIT = `(function(){try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
+// Runs before paint so the theme never flashes. Dark is the default world;
+// a visitor's explicit toggle choice (saved in localStorage) wins after that.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light")t="dark";if(t==="dark")document.documentElement.classList.add("dark");}catch(e){document.documentElement.classList.add("dark");}})();`;
 
 export default function RootLayout({
   children,

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import * as THREE from "three";
@@ -12,6 +12,8 @@ import { MorphInstances } from "./MorphInstances";
 import { DustField } from "./DustField";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
 import { useCapabilityTier } from "@/hooks/useCapabilityTier";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useGameStore } from "@/hooks/useGameStore";
 
 /**
  * The ONE persistent scene. Always mounted so the voxel morph journey is
@@ -72,6 +74,18 @@ function CameraRig() {
   const u = useRef(0); // damped position along the spline, 0..1
   const posV = useRef(new THREE.Vector3());
   const lookV = useRef(new THREE.Vector3());
+  const shakeAt = useRef(-10);
+  const reduced = useReducedMotion();
+
+  // any click lands a 2-frame micro-shake — impact feedback for the shockwave
+  useEffect(() => {
+    if (reduced) return;
+    const onDown = () => {
+      shakeAt.current = performance.now();
+    };
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [reduced]);
 
   useFrame((state, dt) => {
     const { section, pointer, ready } = useScrollStore.getState();
@@ -85,7 +99,17 @@ function CameraRig() {
     // travel along the spline toward the active section's parameter
     const idx = Math.max(SECTION_ORDER.indexOf(section), 0);
     const targetU = idx / (SECTION_ORDER.length - 1);
+    const uPrev = u.current;
     u.current += (targetU - u.current) * (1 - Math.exp(-1.6 * dt));
+
+    // scroll-velocity warp: fast travel widens the FOV like hitting thrusters
+    if (!reduced) {
+      const uVel = Math.abs(u.current - uPrev) / Math.max(dt, 1e-4);
+      const cam = state.camera as THREE.PerspectiveCamera;
+      const targetFov = 38 + Math.min(uVel * 55, 7);
+      cam.fov += (targetFov - cam.fov) * (1 - Math.exp(-4 * dt));
+      cam.updateProjectionMatrix();
+    }
 
     POS_CURVE.getPointAt(THREE.MathUtils.clamp(u.current, 0, 1), posV.current);
     LOOK_CURVE.getPointAt(THREE.MathUtils.clamp(u.current, 0, 1), lookV.current);
@@ -95,6 +119,16 @@ function CameraRig() {
     const tz = THREE.MathUtils.lerp(INTRO_FROM[2], posV.current.z, e);
 
     easing.damp3(state.camera.position, [tx, ty, tz], 0.5, dt);
+
+    // decaying click shake, applied after damping so it never accumulates
+    const shakeAge = (performance.now() - shakeAt.current) / 1000;
+    if (!reduced && shakeAge < 0.22) {
+      const t = state.clock.elapsedTime;
+      const amp = 0.018 * (1 - shakeAge / 0.22);
+      state.camera.position.x += Math.sin(t * 91) * amp;
+      state.camera.position.y += Math.cos(t * 83) * amp;
+    }
+
     state.camera.lookAt(lookV.current);
   });
   return null;
@@ -103,6 +137,40 @@ function CameraRig() {
 function HeroSculpture() {
   const group = useRef<THREE.Group>(null);
   const { size } = useThree();
+  const spinVel = useRef(0);
+  const dragging = useRef(false);
+  const lastX = useRef(0);
+
+  // grab-and-spin: drag on the sculpture's half of the hero flicks it around
+  // with inertia (mouse only — touch keeps native scrolling)
+  useEffect(() => {
+    const down = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      if (useScrollStore.getState().section !== "hero") return;
+      if (e.clientX / window.innerWidth < 0.5) return;
+      if ((e.target as HTMLElement | null)?.closest("a, button, input, textarea")) return;
+      dragging.current = true;
+      lastX.current = e.clientX;
+    };
+    const move = (e: PointerEvent) => {
+      if (!dragging.current || !group.current) return;
+      const dx = e.clientX - lastX.current;
+      lastX.current = e.clientX;
+      group.current.rotation.y += dx * 0.006;
+      spinVel.current = THREE.MathUtils.clamp(dx * 0.004, -0.35, 0.35);
+    };
+    const up = () => {
+      dragging.current = false;
+    };
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerup", up);
+    return () => {
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+  }, []);
 
   useFrame((_, dt) => {
     if (!group.current) return;
@@ -114,6 +182,12 @@ function HeroSculpture() {
     easing.damp3(group.current.scale, [s, s, s], 0.4, dt);
     easing.damp3(group.current.position, [2.3 * xf, -0.1, 0], 0.4, dt);
     group.current.visible = group.current.scale.x > 0.01;
+
+    // free-spin inertia after a flick, decaying naturally
+    if (!dragging.current && Math.abs(spinVel.current) > 0.0004) {
+      group.current.rotation.y += spinVel.current;
+      spinVel.current *= Math.exp(-1.4 * dt);
+    }
   });
 
   return (
@@ -128,12 +202,16 @@ function HeroSculpture() {
 export default function R3FCanvas() {
   const [dpr, setDpr] = useState(1.5);
   const tier = useCapabilityTier();
+  // freeze this whole scene while PLAY mode runs — two live WebGL scenes
+  // plus physics is what causes the lag
+  const playMode = useGameStore((s) => s.playMode);
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10">
       <Canvas
         shadows
         dpr={dpr}
+        frameloop={playMode ? "never" : "always"}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: INTRO_FROM, fov: 38 }}
         onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}

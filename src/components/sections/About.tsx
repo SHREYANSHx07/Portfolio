@@ -94,12 +94,9 @@ export function About() {
                 </span>
               </div>
             )}
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
-              <span className="rounded-full bg-ink/80 px-3 py-1 font-mono text-[11px] text-surface backdrop-blur">
-                {education.school.split(" ").slice(0, 3).join(" ")}
-              </span>
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-end p-4">
               <span className="rounded-full bg-surface/90 px-3 py-1 font-mono text-[11px] text-ink backdrop-blur">
-                {education.period}
+                B.Tech CS · {education.period}
               </span>
             </div>
           </div>

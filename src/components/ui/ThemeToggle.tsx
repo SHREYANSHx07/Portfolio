@@ -2,6 +2,8 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useThemeStore } from "@/hooks/useTheme";
+import { useGameStore } from "@/hooks/useGameStore";
+import { sfxClick } from "@/lib/sfx";
 
 /**
  * Sun ⇄ moon theme toggle. The icon swap is pure CSS keyed off `.dark` on
@@ -14,7 +16,11 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={() => {
+        toggle();
+        useGameStore.getState().unlock("night-shift");
+        sfxClick();
+      }}
       aria-label="Toggle dark mode"
       data-cursor="Theme"
       className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line/80 bg-surface/70 text-ink backdrop-blur transition-colors hover:border-cobalt/60 hover:text-cobalt"

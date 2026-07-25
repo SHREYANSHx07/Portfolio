@@ -17,6 +17,8 @@ import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useModalScrollLock } from "@/hooks/useModalScrollLock";
+import { useGameStore } from "@/hooks/useGameStore";
+import { lenisInstance } from "@/components/providers/SmoothScrollProvider";
 import { useCapabilityTier } from "@/hooks/useCapabilityTier";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { projects, type Project } from "@/data/projects";
@@ -214,15 +216,65 @@ function Gallery({ onOpen }: { onOpen: (p: Project) => void }) {
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const next = Math.min(projects.length - 1, Math.max(0, Math.round(v * (projects.length - 1))));
+    if (next === projects.length - 1) useGameStore.getState().unlock("gallery-end");
     setIdx((prev) => (prev === next ? prev : next));
   });
+
+  // drag-to-travel: horizontal mouse drag scrubs the gallery (it maps onto
+  // the wrapper's scroll range), with momentum on release. Touch keeps
+  // native vertical scrolling.
+  const drag = useRef({ active: false, lastX: 0, vel: 0, moved: 0 });
+  const scrollByDelta = (dx: number) => {
+    const y = window.scrollY - dx * 2.4;
+    const lenis = lenisInstance.current;
+    if (lenis) lenis.scrollTo(y, { immediate: true });
+    else window.scrollTo(0, y);
+  };
+  const onDragEnd = () => {
+    const d = drag.current;
+    if (!d.active) return;
+    d.active = false;
+    let v = d.vel;
+    const glide = () => {
+      v *= 0.93;
+      if (Math.abs(v) < 0.4) return;
+      scrollByDelta(v);
+      requestAnimationFrame(glide);
+    };
+    requestAnimationFrame(glide);
+  };
 
   const active = projects[idx];
   const matched = matchesFilter(active, skillFilter);
 
   return (
     <div ref={wrap} className="relative h-[260vh]">
-      <div className="sticky top-0 flex h-screen flex-col justify-center">
+      <div
+        className="sticky top-0 flex h-screen select-none flex-col justify-center"
+        onPointerDown={(e) => {
+          if (e.pointerType === "touch") return;
+          drag.current = { active: true, lastX: e.clientX, vel: 0, moved: 0 };
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d.active) return;
+          const dx = e.clientX - d.lastX;
+          d.lastX = e.clientX;
+          d.vel = dx;
+          d.moved += Math.abs(dx);
+          scrollByDelta(dx);
+        }}
+        onPointerUp={onDragEnd}
+        onPointerLeave={onDragEnd}
+        onClickCapture={(e) => {
+          // a real drag shouldn't count as a click on a gallery panel
+          if (drag.current.moved > 8) {
+            e.preventDefault();
+            e.stopPropagation();
+            drag.current.moved = 0;
+          }
+        }}
+      >
         <div className="relative h-[62vh]">
           <ProjectsGalleryCanvas progress={scrollYProgress} onOpen={onOpen} />
         </div>

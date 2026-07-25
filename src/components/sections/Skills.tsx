@@ -5,6 +5,7 @@ import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useScrollStore } from "@/hooks/useScrollStore";
+import { useGameStore } from "@/hooks/useGameStore";
 import { skills, skillCategories } from "@/data/skills";
 import { EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -73,7 +74,10 @@ export function Skills() {
                           data-cursor="hover"
                           onMouseEnter={() => setHoverSkill(s.name)}
                           onMouseLeave={() => setHoverSkill(null)}
-                          onClick={() => setSkillFilter(s.name)}
+                          onClick={() => {
+                            setSkillFilter(s.name);
+                            useGameStore.getState().unlock("curator");
+                          }}
                           className={cn(
                             "rounded-lg px-3 py-1.5 text-sm transition-colors",
                             active

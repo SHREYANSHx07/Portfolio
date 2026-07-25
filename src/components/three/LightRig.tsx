@@ -28,7 +28,7 @@ export function LightRig() {
           intensity={1.35}
           color="#c9d4ff"
           castShadow
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize={[1024, 1024]}
           shadow-bias={-0.0004}
         >
           <orthographicCamera attach="shadow-camera" args={[-8, 8, 8, -8, 0.1, 30]} />
@@ -81,7 +81,7 @@ export function LightRig() {
         intensity={2.1}
         color="#fff3e2"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0004}
       >
         <orthographicCamera attach="shadow-camera" args={[-8, 8, 8, -8, 0.1, 30]} />

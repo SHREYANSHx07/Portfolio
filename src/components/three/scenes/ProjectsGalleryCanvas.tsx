@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -8,6 +8,7 @@ import type { MotionValue } from "framer-motion";
 import { accentHex } from "@/lib/theme";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { useThemeStore } from "@/hooks/useTheme";
+import { useGameStore } from "@/hooks/useGameStore";
 import { projects, type Project } from "@/data/projects";
 
 /**
@@ -31,7 +32,7 @@ function Panel({
   onOpen: (p: Project) => void;
 }) {
   const group = useRef<THREE.Group>(null);
-  const mat = useRef<THREE.MeshStandardMaterial>(null);
+  const mat = useRef<THREE.MeshBasicMaterial>(null);
   const frameMat = useRef<THREE.MeshStandardMaterial>(null);
   const texture = useTexture(project.image!);
   const theme = useThemeStore((s) => s.theme);
@@ -60,7 +61,7 @@ function Panel({
     const matches =
       !skillFilter ||
       project.stack.some((s) => s.toLowerCase().includes(skillFilter.toLowerCase()));
-    const targetOpacity = (matches ? 1 : 0.25) * (1 - Math.min(dist * 0.16, 0.55));
+    const targetOpacity = (matches ? 1 : 0.3) * (1 - Math.min(dist * 0.09, 0.32));
     if (mat.current) mat.current.opacity += (targetOpacity - mat.current.opacity) * k;
     if (frameMat.current)
       frameMat.current.opacity += (targetOpacity - frameMat.current.opacity) * k;
@@ -92,7 +93,9 @@ function Panel({
           onPointerOut={() => (document.body.style.cursor = "")}
         >
           <planeGeometry args={[2.8, 1.76]} />
-          <meshStandardMaterial ref={mat} map={texture} roughness={0.55} transparent toneMapped={false} />
+          {/* unlit, like a real screen — screenshots stay at full brightness
+              regardless of scene lighting or theme */}
+          <meshBasicMaterial ref={mat} map={texture} transparent toneMapped={false} />
         </mesh>
       </group>
     </group>
@@ -129,11 +132,28 @@ export function ProjectsGalleryCanvas({
 }) {
   const cam = useMemo(() => ({ position: [0, 0.1, 4.3] as [number, number, number], fov: 42 }), []);
   const dark = useThemeStore((s) => s.theme === "dark");
+  const playMode = useGameStore((s) => s.playMode);
+
+  // only render while actually on screen — an offscreen gallery canvas
+  // otherwise burns GPU for nothing on every single frame
+  const holder = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = holder.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), {
+      rootMargin: "25%",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
+    <div ref={holder} className="h-full w-full">
     <Canvas
       dpr={[1, 1.8]}
       camera={cam}
+      frameloop={visible && !playMode ? "always" : "never"}
       gl={{ antialias: true, alpha: true }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
     >
@@ -157,5 +177,6 @@ export function ProjectsGalleryCanvas({
         <Rig progress={progress} onOpen={onOpen} />
       </Suspense>
     </Canvas>
+    </div>
   );
 }
