@@ -77,7 +77,7 @@ export function Contact() {
                 key="sent"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line bg-surface p-10 text-center shadow-sm"
+                className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line/70 bg-surface/55 p-10 text-center shadow-sm backdrop-blur-md"
               >
                 <div className="h-32 w-full">
                   <PaperPlaneCanvas />
@@ -102,7 +102,7 @@ export function Contact() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7 }}
-                className="space-y-5 rounded-3xl border border-line bg-surface p-7 shadow-sm sm:p-8"
+                className="space-y-5 rounded-3xl border border-line/70 bg-surface/55 p-7 shadow-sm backdrop-blur-md sm:p-8"
               >
                 {/* honeypot */}
                 <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
@@ -119,7 +119,7 @@ export function Contact() {
                     required
                     rows={4}
                     placeholder="What are you building?"
-                    className="w-full resize-none rounded-xl border border-line bg-paper px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted-ink/60 focus:border-cobalt"
+                    className="w-full resize-none rounded-xl border border-line/70 bg-paper/50 px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted-ink/60 focus:border-cobalt"
                   />
                 </div>
 
@@ -170,7 +170,7 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted-ink/60 focus:border-cobalt"
+        className="w-full rounded-xl border border-line/70 bg-paper/50 px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted-ink/60 focus:border-cobalt"
       />
     </div>
   );

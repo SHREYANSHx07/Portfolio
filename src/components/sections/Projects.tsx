@@ -145,9 +145,9 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: 10, opacity: 0 }}
         transition={{ duration: 0.4, ease: EASE }}
-        className="relative z-10 grid max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
+        className="relative z-10 flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
       >
-        <div className="relative aspect-[16/9]">
+        <div className="relative aspect-[16/9] shrink-0">
           <Image src={project.image!} alt={project.title} fill sizes="768px" className="object-cover" />
           <button
             onClick={onClose}
@@ -158,7 +158,7 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
             ✕
           </button>
         </div>
-        <div data-lenis-prevent className="overflow-y-auto overscroll-contain p-7">
+        <div data-lenis-prevent className="min-h-0 overflow-y-auto overscroll-contain p-7">
           <h3 className="font-display text-2xl font-medium text-ink">{project.title}</h3>
           <p className="mt-1 text-sm text-cobalt">{project.tagline}</p>
           <ul className="mt-5 space-y-3 text-sm leading-relaxed text-muted-ink">

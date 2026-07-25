@@ -1,27 +1,89 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ff5a3c"/>
-      <stop offset="1" stop-color="#ff8a72"/>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a1a1a"/>
+      <stop offset="1" stop-color="#3a2a24"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#fbfaf7"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="800" fill="#fbfaf7"/>
-  <rect x="0" y="0" width="1200" height="120" fill="url(#g)"/>
-  <rect x="60" y="48" width="260" height="24" rx="12" fill="#ffffff" opacity="0.9"/>
-  <g fill="#ece7de">
-    <rect x="60" y="180" width="520" height="240" rx="16"/>
-    <rect x="620" y="180" width="520" height="240" rx="16"/>
-    <rect x="60" y="450" width="1080" height="250" rx="16"/>
+  <rect width="1200" height="800" fill="#f4f1ec"/>
+
+  <!-- top bar -->
+  <rect width="1200" height="86" fill="url(#hdr)"/>
+  <circle cx="52" cy="43" r="15" fill="#ff5a3c"/>
+  <text x="84" y="52" font-family="sans-serif" font-size="26" font-weight="600" fill="#ffffff">Resto · Ops Console</text>
+  <rect x="880" y="24" width="140" height="38" rx="19" fill="#ff5a3c"/>
+  <text x="950" y="49" text-anchor="middle" font-family="monospace" font-size="18" fill="#ffffff">JWT ✓</text>
+  <rect x="1036" y="24" width="128" height="38" rx="19" fill="#ffffff" opacity="0.14"/>
+  <text x="1100" y="49" text-anchor="middle" font-family="monospace" font-size="18" fill="#ffffff">RBAC · 5 roles</text>
+
+  <!-- terminal panel -->
+  <rect x="48" y="130" width="540" height="420" rx="20" fill="#1a1a1a"/>
+  <circle cx="84" cy="166" r="7" fill="#ff5a3c"/>
+  <circle cx="108" cy="166" r="7" fill="#e8b84b"/>
+  <circle cx="132" cy="166" r="7" fill="#34d399"/>
+  <g font-family="monospace" font-size="19">
+    <text x="84" y="220" fill="#8a8aa0">$ go run main.go</text>
+    <text x="84" y="258" fill="#34d399">[GIN] ✓ listening on :8080</text>
+    <text x="84" y="300" fill="#fbfaf7">POST  /auth/login</text>
+    <text x="440" y="300" fill="#34d399">201</text>
+    <text x="84" y="338" fill="#fbfaf7">GET   /orders/:table</text>
+    <text x="440" y="338" fill="#34d399">200</text>
+    <text x="84" y="376" fill="#fbfaf7">POST  /orders</text>
+    <text x="440" y="376" fill="#34d399">201</text>
+    <text x="84" y="414" fill="#fbfaf7">PATCH /invoices/:id</text>
+    <text x="440" y="414" fill="#34d399">200</text>
+    <text x="84" y="452" fill="#6a82f5">redis: token blacklist ✓</text>
+    <text x="84" y="490" fill="#8a8aa0">mongo: orders persisted · 4ms</text>
+    <text x="84" y="524" fill="#ff8a72">▮</text>
   </g>
-  <g fill="#ff5a3c">
-    <rect x="90" y="220" width="180" height="18" rx="9"/>
-    <rect x="90" y="260" width="120" height="18" rx="9"/>
+
+  <!-- order cards -->
+  <g>
+    <rect x="628" y="130" width="250" height="190" rx="18" fill="url(#card)" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="656" y="176" font-family="sans-serif" font-size="22" font-weight="600" fill="#1a1a1a">Table 12</text>
+    <rect x="656" y="196" width="112" height="30" rx="15" fill="#ff5a3c" opacity="0.15"/>
+    <text x="712" y="217" text-anchor="middle" font-family="monospace" font-size="16" fill="#ff5a3c">cooking</text>
+    <text x="656" y="262" font-family="sans-serif" font-size="18" fill="#6b675f">2× Ramen · 1× Gyoza</text>
+    <text x="656" y="296" font-family="monospace" font-size="20" fill="#1a1a1a">₹ 940.00</text>
+
+    <rect x="902" y="130" width="250" height="190" rx="18" fill="url(#card)" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="930" y="176" font-family="sans-serif" font-size="22" font-weight="600" fill="#1a1a1a">Table 04</text>
+    <rect x="930" y="196" width="98" height="30" rx="15" fill="#2b4cf0" opacity="0.15"/>
+    <text x="979" y="217" text-anchor="middle" font-family="monospace" font-size="16" fill="#2b4cf0">served</text>
+    <text x="930" y="262" font-family="sans-serif" font-size="18" fill="#6b675f">4× Thali · 2× Lassi</text>
+    <text x="930" y="296" font-family="monospace" font-size="20" fill="#1a1a1a">₹ 1,280.00</text>
+
+    <rect x="628" y="344" width="524" height="206" rx="18" fill="url(#card)" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="656" y="392" font-family="sans-serif" font-size="20" font-weight="600" fill="#1a1a1a">Invoice · auto-billing</text>
+    <line x1="656" y1="412" x2="1124" y2="412" stroke="#e4dfd6" stroke-width="2"/>
+    <g font-family="monospace" font-size="17" fill="#6b675f">
+      <text x="656" y="446">subtotal</text><text x="1124" y="446" text-anchor="end">₹ 2,220.00</text>
+      <text x="656" y="478">gst (5%)</text><text x="1124" y="478" text-anchor="end">₹ 111.00</text>
+    </g>
+    <text x="656" y="522" font-family="sans-serif" font-size="20" font-weight="700" fill="#1a1a1a">total</text>
+    <text x="1124" y="522" text-anchor="end" font-family="monospace" font-size="22" fill="#ff5a3c">₹ 2,331.00</text>
   </g>
-  <g fill="#2b4cf0" opacity="0.85">
-    <rect x="650" y="220" width="160" height="18" rx="9"/>
-    <rect x="650" y="260" width="200" height="18" rx="9"/>
-  </g>
-  <g fill="#1a1a1a" font-family="monospace" font-size="34" opacity="0.75">
-    <text x="90" y="560">Go · Gin · JWT · 20+ endpoints</text>
+
+  <!-- footer metrics -->
+  <g font-family="monospace">
+    <rect x="48" y="596" width="256" height="150" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="80" y="656" font-size="40" fill="#ff5a3c">20+</text>
+    <text x="80" y="694" font-size="16" fill="#6b675f">REST endpoints</text>
+
+    <rect x="332" y="596" width="256" height="150" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="364" y="656" font-size="40" fill="#2b4cf0">1,000+</text>
+    <text x="364" y="694" font-size="16" fill="#6b675f">session requests</text>
+
+    <rect x="616" y="596" width="256" height="150" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <text x="648" y="656" font-size="40" fill="#1a1a1a">5</text>
+    <text x="648" y="694" font-size="16" fill="#6b675f">concurrent roles</text>
+
+    <rect x="900" y="596" width="252" height="150" rx="18" fill="#1a1a1a"/>
+    <text x="932" y="650" font-size="24" fill="#34d399">Go · Gin</text>
+    <text x="932" y="686" font-size="18" fill="#8a8aa0">Mongo · Redis · JWT</text>
   </g>
 </svg>

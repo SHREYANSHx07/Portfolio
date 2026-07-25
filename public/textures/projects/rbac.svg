@@ -1,32 +1,92 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2b4cf0"/>
-      <stop offset="1" stop-color="#6a82f5"/>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a1a1a"/>
+      <stop offset="1" stop-color="#2b4cf0"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="800" fill="#fbfaf7"/>
-  <rect x="0" y="0" width="1200" height="120" fill="url(#g)"/>
-  <circle cx="70" cy="60" r="18" fill="#fbfaf7"/>
-  <rect x="110" y="50" width="220" height="20" rx="10" fill="#ffffff" opacity="0.85"/>
-  <g fill="#e4dfd6">
-    <rect x="60" y="180" width="300" height="520" rx="16"/>
+  <rect width="1200" height="800" fill="#f4f1ec"/>
+
+  <!-- header -->
+  <rect width="1200" height="86" fill="url(#hdr)"/>
+  <circle cx="52" cy="43" r="15" fill="#6a82f5"/>
+  <text x="84" y="52" font-family="sans-serif" font-size="26" font-weight="600" fill="#ffffff">Admin · RBAC Console</text>
+  <rect x="924" y="24" width="240" height="38" rx="19" fill="#ffffff" opacity="0.15"/>
+  <text x="1044" y="49" text-anchor="middle" font-family="monospace" font-size="17" fill="#ffffff">redis cache · −35% load</text>
+
+  <!-- sidebar -->
+  <rect x="48" y="130" width="240" height="616" rx="20" fill="#1a1a1a"/>
+  <g font-family="sans-serif" font-size="19">
+    <rect x="72" y="166" width="192" height="44" rx="12" fill="#2b4cf0"/>
+    <text x="96" y="195" fill="#ffffff">Dashboard</text>
+    <text x="96" y="258" fill="#8a8aa0">Users</text>
+    <text x="96" y="312" fill="#8a8aa0">Projects</text>
+    <text x="96" y="366" fill="#8a8aa0">Tasks</text>
+    <text x="96" y="420" fill="#8a8aa0">Analytics</text>
+    <text x="96" y="474" fill="#8a8aa0">Reports</text>
   </g>
-  <g fill="#ece7de">
-    <rect x="400" y="180" width="360" height="250" rx="16"/>
-    <rect x="800" y="180" width="340" height="250" rx="16"/>
-    <rect x="400" y="460" width="740" height="240" rx="16"/>
+  <rect x="72" y="640" width="192" height="76" rx="14" fill="#ffffff" opacity="0.08"/>
+  <text x="96" y="672" font-family="monospace" font-size="15" fill="#8a8aa0">signed in as</text>
+  <text x="96" y="698" font-family="monospace" font-size="17" fill="#6a82f5">superadmin</text>
+
+  <!-- role cards -->
+  <g font-family="sans-serif">
+    <rect x="324" y="130" width="264" height="170" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <rect x="352" y="158" width="104" height="30" rx="15" fill="#2b4cf0" opacity="0.14"/>
+    <text x="404" y="179" text-anchor="middle" font-family="monospace" font-size="15" fill="#2b4cf0">admin</text>
+    <text x="352" y="238" font-size="40" font-family="monospace" fill="#1a1a1a">3</text>
+    <text x="352" y="272" font-size="16" fill="#6b675f">full access · manage roles</text>
+
+    <rect x="612" y="130" width="264" height="170" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <rect x="640" y="158" width="120" height="30" rx="15" fill="#ff5a3c" opacity="0.14"/>
+    <text x="700" y="179" text-anchor="middle" font-family="monospace" font-size="15" fill="#ff5a3c">manager</text>
+    <text x="640" y="238" font-size="40" font-family="monospace" fill="#1a1a1a">6</text>
+    <text x="640" y="272" font-size="16" fill="#6b675f">assign tasks · analytics</text>
+
+    <rect x="900" y="130" width="252" height="170" rx="18" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+    <rect x="928" y="158" width="104" height="30" rx="15" fill="#1a1a1a" opacity="0.1"/>
+    <text x="980" y="179" text-anchor="middle" font-family="monospace" font-size="15" fill="#1a1a1a">member</text>
+    <text x="928" y="238" font-size="40" font-family="monospace" fill="#1a1a1a">14</text>
+    <text x="928" y="272" font-size="16" fill="#6b675f">own tasks · read-only</text>
   </g>
-  <g fill="#2b4cf0" opacity="0.9">
-    <rect x="90" y="220" width="200" height="16" rx="8"/>
-    <rect x="90" y="260" width="150" height="16" rx="8"/>
-    <rect x="90" y="300" width="180" height="16" rx="8"/>
+
+  <!-- permissions matrix -->
+  <rect x="324" y="330" width="552" height="416" rx="20" fill="#ffffff" stroke="#e4dfd6" stroke-width="2"/>
+  <text x="356" y="378" font-family="sans-serif" font-size="20" font-weight="600" fill="#1a1a1a">Permission matrix</text>
+  <g font-family="monospace" font-size="16" fill="#6b675f">
+    <text x="356" y="424">resource</text>
+    <text x="620" y="424">admin</text>
+    <text x="716" y="424">mgr</text>
+    <text x="800" y="424">member</text>
   </g>
-  <g fill="#ff5a3c">
-    <circle cx="470" cy="250" r="26"/>
-    <circle cx="870" cy="250" r="26"/>
+  <line x1="356" y1="440" x2="844" y2="440" stroke="#e4dfd6" stroke-width="2"/>
+  <g font-family="monospace" font-size="17">
+    <text x="356" y="478" fill="#1a1a1a">users.write</text>
+    <text x="636" y="478" fill="#2b4cf0">✓</text><text x="724" y="478" fill="#e4dfd6">—</text><text x="820" y="478" fill="#e4dfd6">—</text>
+    <text x="356" y="520" fill="#1a1a1a">tasks.assign</text>
+    <text x="636" y="520" fill="#2b4cf0">✓</text><text x="724" y="520" fill="#2b4cf0">✓</text><text x="820" y="520" fill="#e4dfd6">—</text>
+    <text x="356" y="562" fill="#1a1a1a">reports.view</text>
+    <text x="636" y="562" fill="#2b4cf0">✓</text><text x="724" y="562" fill="#2b4cf0">✓</text><text x="820" y="562" fill="#2b4cf0">✓</text>
+    <text x="356" y="604" fill="#1a1a1a">analytics.export</text>
+    <text x="636" y="604" fill="#2b4cf0">✓</text><text x="724" y="604" fill="#ff5a3c">±</text><text x="820" y="604" fill="#e4dfd6">—</text>
+    <text x="356" y="646" fill="#1a1a1a">audit.read</text>
+    <text x="636" y="646" fill="#2b4cf0">✓</text><text x="724" y="646" fill="#e4dfd6">—</text><text x="820" y="646" fill="#e4dfd6">—</text>
   </g>
-  <g fill="#1a1a1a" font-family="monospace" font-size="34" opacity="0.75">
-    <text x="440" y="600">RBAC · 3 roles · 20+ users</text>
+  <rect x="356" y="676" width="240" height="40" rx="20" fill="#2b4cf0"/>
+  <text x="476" y="702" text-anchor="middle" font-family="sans-serif" font-size="17" fill="#ffffff">+ Add permission</text>
+
+  <!-- activity panel -->
+  <rect x="900" y="330" width="252" height="416" rx="20" fill="#1a1a1a"/>
+  <text x="930" y="376" font-family="monospace" font-size="16" fill="#8a8aa0">LIVE ACTIVITY</text>
+  <g font-family="monospace" font-size="14">
+    <text x="930" y="420" fill="#34d399">✓ task #218 assigned</text>
+    <text x="930" y="454" fill="#6a82f5">↺ session cached</text>
+    <text x="930" y="488" fill="#34d399">✓ report exported</text>
+    <text x="930" y="522" fill="#ff8a72">⚠ role change logged</text>
+    <text x="930" y="556" fill="#6a82f5">↺ redis hit · 2ms</text>
+    <text x="930" y="590" fill="#34d399">✓ user invited</text>
   </g>
+  <rect x="930" y="640" width="192" height="76" rx="14" fill="#ffffff" opacity="0.08"/>
+  <text x="954" y="672" font-size="26" font-family="monospace" fill="#6a82f5">20+</text>
+  <text x="954" y="700" font-size="14" font-family="monospace" fill="#8a8aa0">internal users</text>
 </svg>

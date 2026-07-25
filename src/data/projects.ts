@@ -48,6 +48,7 @@ export const projects: Project[] = [
       "20+ RESTful endpoints for menus, orders, tables and invoices with auto-calculated billing, MongoDB persistence and Redis caching for high-frequency reads.",
     ],
     image: "/textures/projects/restaurant.svg",
+    href: "https://github.com/SHREYANSHx07/Restaurant_Managment_System",
   },
   {
     id: "ai-tone-system",
@@ -60,5 +61,6 @@ export const projects: Project[] = [
       "FAISS vector store indexes 10,000+ memory vectors for sub-100ms semantic retrieval — personalized, context-aware interactions with memory analytics and feedback calibration.",
     ],
     image: "/textures/projects/ai-tone.svg",
+    href: "https://github.com/SHREYANSHx07/AI-Tone-Adaptation-System-",
   },
 ];

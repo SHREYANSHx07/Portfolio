@@ -109,7 +109,7 @@ export const flagship: Flagship[] = [
     subtitle: "RAG + tool-calling platform resolving real fintech queries",
     description:
       "A production support platform for EU→India remittances that autonomously answers customers from a knowledge base and live account data. Multi-agent RAG pipeline on async FastAPI, a ChatGPT-style Next.js 15 frontend streaming over SSE, and a provider-agnostic LLM layer running Claude through a streaming two-round tool-use loop.",
-    image: "/textures/projects/ai-support.svg",
+    image: "/textures/projects/scopex-agent.png",
     accent: "coral",
     metrics: [
       { value: "2-round", label: "streaming tool-use loop" },
