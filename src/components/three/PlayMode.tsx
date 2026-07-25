@@ -31,7 +31,7 @@ const BOSS_TIME_MS = 10_000;
 const fract = (x: number) => x - Math.floor(x);
 const rnd = (i: number, s: number) => fract(Math.sin(i * 12.9898 + s * 78.233) * 43758.5453);
 
-type Phase = "targets" | "boss" | "won" | "lost" | "out";
+type Phase = "intro" | "targets" | "boss" | "won" | "lost" | "out";
 
 /* ------------------------------------------------------------------ */
 /* Shard burst — 14 hand-animated fragments, then gone                 */
@@ -285,11 +285,11 @@ export default function PlayMode() {
   const C = palette(dark ? "dark" : "light");
   const colors = useMemo(() => [C.cobalt, C.coral, C.ink, C.cobaltSoft], [C]);
 
-  const [phase, setPhase] = useState<Phase>("targets");
+  const [phase, setPhase] = useState<Phase>("intro");
   const [score, setScore] = useState(0);
   const [bossHits, setBossHits] = useState(0);
   const [deadline, setDeadline] = useState(0);
-  const [box, setBox] = useState<{ id: number; seed: number } | null>({ id: 1, seed: 1 });
+  const [box, setBox] = useState<{ id: number; seed: number } | null>(null);
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number; color: string; big?: boolean }[]>([]);
   const nextId = useRef(2);
   // counters live in refs so all side effects (store unlocks, sfx, spawns)
@@ -297,8 +297,18 @@ export default function PlayMode() {
   // during render and corrupts other components' updates)
   const scoreRef = useRef(0);
   const bossHitsRef = useRef(0);
-  const droppedRef = useRef(1); // the first box is already falling
-  const [dropped, setDropped] = useState(1);
+  const droppedRef = useRef(0);
+  const [dropped, setDropped] = useState(0);
+
+  const start = () => {
+    scoreRef.current = 0;
+    droppedRef.current = 1;
+    setScore(0);
+    setDropped(1);
+    setPhase("targets");
+    setBox({ id: nextId.current++, seed: nextId.current * 11 });
+    sfxClick();
+  };
 
   const addBurst = useCallback((x: number, y: number, color: string, big = false) => {
     const id = nextId.current++;
@@ -468,6 +478,48 @@ export default function PlayMode() {
           </>
         )}
       </div>
+
+      {/* mission briefing — the rules, before anything falls */}
+      {phase === "intro" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+          <div className="pointer-events-auto max-w-md rounded-3xl border border-cobalt/50 bg-surface/95 p-7 text-center shadow-2xl backdrop-blur">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cobalt">
+              ◆ mission briefing
+            </p>
+            <h3 className="mt-3 font-display text-2xl font-medium text-ink">
+              Boxes are falling. Don&apos;t let them land.
+            </h3>
+            <ul className="mt-4 space-y-2 text-left text-sm leading-relaxed text-muted-ink">
+              <li>
+                <span className="font-mono text-cobalt">01 —</span> Voxel crates drop from the
+                sky, one at a time. <span className="text-ink">Click them mid-air</span> to
+                blast them.
+              </li>
+              <li>
+                <span className="font-mono text-cobalt">02 —</span> If a crate touches the
+                ground, it self-destructs — <span className="text-ink">no point</span>.
+              </li>
+              <li>
+                <span className="font-mono text-cobalt">03 —</span> Catch{" "}
+                <span className="text-ink">{TARGET_GOAL} of {TARGET_TOTAL}</span> to reach
+                level 2: <span className="text-coral">the boss</span>.
+              </li>
+              <li>
+                <span className="font-mono text-cobalt">04 —</span> The boss takes{" "}
+                <span className="text-ink">{BOSS_GOAL} hits in {BOSS_TIME_MS / 1000} seconds</span>.
+                Good luck.
+              </li>
+            </ul>
+            <button
+              onClick={start}
+              data-cursor="Start"
+              className="mt-6 w-full rounded-full bg-ink px-6 py-3 font-mono text-xs uppercase tracking-widest text-surface transition-colors hover:bg-cobalt"
+            >
+              ▶ start mission
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ending card — win or lose, the recruiter pitch always lands */}
       {(phase === "won" || phase === "lost" || phase === "out") && (
