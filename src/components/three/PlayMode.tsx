@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { motion } from "framer-motion";
 import * as THREE from "three";
 import { useGameStore } from "@/hooks/useGameStore";
 import { useThemeStore } from "@/hooks/useTheme";
@@ -31,7 +32,7 @@ const BOSS_TIME_MS = 10_000;
 const fract = (x: number) => x - Math.floor(x);
 const rnd = (i: number, s: number) => fract(Math.sin(i * 12.9898 + s * 78.233) * 43758.5453);
 
-type Phase = "intro" | "targets" | "boss" | "won" | "lost" | "out";
+type Phase = "intro" | "targets" | "bossIntro" | "boss" | "won" | "lost" | "out";
 
 /* ------------------------------------------------------------------ */
 /* Shard burst — 14 hand-animated fragments, then gone                 */
@@ -289,6 +290,7 @@ export default function PlayMode() {
   const [score, setScore] = useState(0);
   const [bossHits, setBossHits] = useState(0);
   const [deadline, setDeadline] = useState(0);
+  const [count, setCount] = useState(5);
   const [box, setBox] = useState<{ id: number; seed: number } | null>(null);
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number; color: string; big?: boolean }[]>([]);
   const nextId = useRef(2);
@@ -315,13 +317,12 @@ export default function PlayMode() {
     setBursts((b) => [...b.slice(-6), { id, x, y, color, big }]);
   }, []);
 
-  // after every box resolves (hit or ground): boss, defeat, or next drop
+  // after every box resolves (hit or ground): boss briefing, defeat, or next drop
   const advance = useCallback(() => {
     if (scoreRef.current >= TARGET_GOAL) {
       setTimeout(() => {
-        setPhase("boss");
-        setDeadline(performance.now() + BOSS_TIME_MS);
-        sfxWhoosh();
+        setCount(5);
+        setPhase("bossIntro");
       }, 700);
       return;
     }
@@ -389,10 +390,9 @@ export default function PlayMode() {
     setBossHits(0);
     setBursts([]);
     if (phase === "lost") {
-      // straight back into the boss fight
-      setPhase("boss");
-      setDeadline(performance.now() + BOSS_TIME_MS);
-      sfxWhoosh();
+      // back into the boss fight, with the briefing + countdown
+      setCount(5);
+      setPhase("bossIntro");
     } else {
       // full run from act 1
       scoreRef.current = 0;
@@ -410,6 +410,25 @@ export default function PlayMode() {
       document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
     }, 150);
   };
+
+  // boss countdown: 5 → 1, then the fight (and its timer) begins
+  useEffect(() => {
+    if (phase !== "bossIntro") return;
+    let c = 5;
+    const iv = setInterval(() => {
+      c -= 1;
+      if (c <= 0) {
+        clearInterval(iv);
+        setPhase("boss");
+        setDeadline(performance.now() + BOSS_TIME_MS);
+        sfxWhoosh();
+      } else {
+        setCount(c);
+        sfxClick();
+      }
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [phase]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -517,6 +536,46 @@ export default function PlayMode() {
             >
               ▶ start mission
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* boss briefing — level 2 rules + countdown */}
+      {phase === "bossIntro" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+          <div className="max-w-md rounded-3xl border border-coral/60 bg-surface/95 p-7 text-center shadow-2xl backdrop-blur">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-coral">
+              ◆ level 2 unlocked
+            </p>
+            <h3 className="mt-3 font-display text-2xl font-medium text-ink">
+              The boss is coming.
+            </h3>
+            <ul className="mt-4 space-y-2 text-left text-sm leading-relaxed text-muted-ink">
+              <li>
+                <span className="font-mono text-coral">01 —</span> It never stops moving —{" "}
+                <span className="text-ink">lead your shots</span>.
+              </li>
+              <li>
+                <span className="font-mono text-coral">02 —</span> Land{" "}
+                <span className="text-ink">{BOSS_GOAL} hits in {BOSS_TIME_MS / 1000} seconds</span>{" "}
+                to destroy it.
+              </li>
+              <li>
+                <span className="font-mono text-coral">03 —</span> The timer starts the moment
+                it appears. <span className="text-ink">Click fast.</span>
+              </li>
+            </ul>
+            <div className="mt-5 flex items-center justify-center">
+              <motion.span
+                key={count}
+                initial={{ scale: 1.6, opacity: 0.3 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="font-display text-6xl font-light text-coral"
+              >
+                {count}
+              </motion.span>
+            </div>
           </div>
         </div>
       )}
