@@ -14,6 +14,7 @@ import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 import { flagship, type Flagship as FlagshipProduct } from "@/data/flagship";
 import { EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -94,6 +95,7 @@ function TiltVisual({ product, flip }: { product: FlagshipProduct; flip: boolean
 }
 
 function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: () => void }) {
+  useModalScrollLock();
   const [open, setOpen] = useState<number | null>(0);
   const accentText = product.accent === "coral" ? "text-coral" : "text-cobalt";
   const accentBg = product.accent === "coral" ? "bg-coral" : "bg-cobalt";
@@ -135,7 +137,7 @@ function CaseModal({ product, onClose }: { product: FlagshipProduct; onClose: ()
           </div>
         </div>
 
-        <div className="overflow-y-auto px-6 pb-8 pt-5 sm:px-8">
+        <div data-lenis-prevent className="overflow-y-auto overscroll-contain px-6 pb-8 pt-5 sm:px-8">
           <p className="max-w-2xl text-[15px] leading-relaxed text-muted-ink">{product.description}</p>
 
           {/* metrics */}

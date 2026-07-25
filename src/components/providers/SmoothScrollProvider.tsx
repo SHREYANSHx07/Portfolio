@@ -6,6 +6,9 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
+/** Live Lenis instance, so modals can pause page smoothing while open. */
+export const lenisInstance: { current: Lenis | null } = { current: null };
+
 /**
  * Single source of truth for scroll + time.
  *  - One RAF, driven by gsap.ticker, feeds Lenis (no competing rAF loops).
@@ -36,6 +39,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
 
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add(onTick);
+      lenisInstance.current = lenis;
     }
 
     // Global progress (works with or without Lenis).
@@ -58,6 +62,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       if (lenis) {
         gsap.ticker.remove(onTick);
         lenis.destroy();
+        lenisInstance.current = null;
       }
     };
   }, [reduced]);

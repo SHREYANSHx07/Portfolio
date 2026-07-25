@@ -16,6 +16,7 @@ import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useModalScrollLock } from "@/hooks/useModalScrollLock";
 import { useCapabilityTier } from "@/hooks/useCapabilityTier";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { projects, type Project } from "@/data/projects";
@@ -130,6 +131,7 @@ function TiltCard({
 /* Detail modal                                                        */
 /* ------------------------------------------------------------------ */
 function Modal({ project, onClose }: { project: Project; onClose: () => void }) {
+  useModalScrollLock();
   return (
     <motion.div
       className="fixed inset-0 z-[75] flex items-center justify-center p-4 sm:p-8"
@@ -156,7 +158,7 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
             ✕
           </button>
         </div>
-        <div className="overflow-y-auto p-7">
+        <div data-lenis-prevent className="overflow-y-auto overscroll-contain p-7">
           <h3 className="font-display text-2xl font-medium text-ink">{project.title}</h3>
           <p className="mt-1 text-sm text-cobalt">{project.tagline}</p>
           <ul className="mt-5 space-y-3 text-sm leading-relaxed text-muted-ink">
