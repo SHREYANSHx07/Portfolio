@@ -120,6 +120,27 @@ function buildFormations() {
   ex.tumble = 0.3;
   F.experience = ex;
 
+  // — flagship: twin product systems — cobalt cluster (admin panel) and
+  //   coral cluster (AI agent), each a slow orbital halo behind its card
+  const fl = makeFormation();
+  for (let i = 0; i < N; i++) {
+    const left = i % 2 === 0;
+    const cx = left ? -2.4 : 2.4;
+    const base = left ? COLORS.cobalt : COLORS.coral;
+    const j = Math.floor(i / 2);
+    const a = (j / (N / 2)) * Math.PI * 2;
+    const rr = 1.1 + rnd(i, 9) * 0.5;
+    fl.pos.set(
+      [cx + Math.cos(a) * rr, Math.sin(a * 1.3) * 1.2, -1.4 - rnd(i, 10) * 0.8],
+      i * 3,
+    );
+    fl.scale[i] = j % 6 === 0 ? 0.13 : 0.05 + rnd(i, 11) * 0.05;
+    setColor(fl, i, j % 4 === 0 ? COLORS.ink : base);
+  }
+  fl.opacity = 0.5;
+  fl.tumble = 0.5;
+  F.flagship = fl;
+
   // — projects: vertical dust bands framing the gallery
   const pr = makeFormation();
   for (let i = 0; i < N; i++) {

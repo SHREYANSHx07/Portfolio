@@ -12,6 +12,7 @@ const LINKS: { id: SectionId; label: string }[] = [
   { id: "about", label: "About" },
   { id: "skills", label: "Skills" },
   { id: "experience", label: "Work" },
+  { id: "flagship", label: "ScopeX" },
   { id: "projects", label: "Projects" },
   { id: "achievements", label: "Awards" },
   { id: "contact", label: "Contact" },

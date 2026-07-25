@@ -30,6 +30,7 @@ const CAM: Record<SectionId, { pos: Vec3; look: Vec3 }> = {
   about: { pos: [0.4, 0.1, 6.7], look: [0, 0, 0] },
   skills: { pos: [-0.3, 0.2, 6.8], look: [-0.5, 0, 0] },
   experience: { pos: [0, 0.4, 7.3], look: [0, 0, 0] },
+  flagship: { pos: [0, 0.1, 7.2], look: [0, 0, 0] },
   projects: { pos: [0, 0.2, 7], look: [0, 0, 0] },
   achievements: { pos: [0, 0.9, 7.5], look: [0, 0.3, 0] },
   contact: { pos: [0.5, 0.3, 6.5], look: [0.5, 0.3, 0] },

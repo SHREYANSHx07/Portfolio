@@ -9,6 +9,7 @@ const ORDER: SectionId[] = [
   "about",
   "skills",
   "experience",
+  "flagship",
   "projects",
   "achievements",
   "contact",
@@ -18,6 +19,7 @@ const LABELS: Record<SectionId, string> = {
   about: "About",
   skills: "Skills",
   experience: "Work",
+  flagship: "ScopeX",
   projects: "Projects",
   achievements: "Awards",
   contact: "Contact",
@@ -25,7 +27,7 @@ const LABELS: Record<SectionId, string> = {
 
 /**
  * Scroll HUD: a thin cobalt progress bar pinned to the top of the viewport,
- * plus a fixed corner index ("02 / 07 · Skills"). Reads the store imperatively
+ * plus a fixed corner index ("02 / 08 · Skills"). Reads the store imperatively
  * so it never re-renders on every scroll frame — only when the section changes.
  */
 export function ScrollHUD() {
@@ -63,7 +65,7 @@ export function ScrollHUD() {
         className="pointer-events-none fixed bottom-6 left-6 z-[66] hidden items-center gap-3 font-mono text-[11px] uppercase tracking-widest text-muted-ink sm:flex"
       >
         <span className="text-ink">{String(idx + 1).padStart(2, "0")}</span>
-        <span className="text-muted-ink/50">/ 07</span>
+        <span className="text-muted-ink/50">/ 08</span>
         <span className="h-px w-6 bg-ink/20" />
         <motion.span key={section} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-cobalt">
           {LABELS[section]}

@@ -18,7 +18,7 @@ try {
     for (let step = 0; step < 80; step++) {
       const current = await p.evaluate(() => {
         const els = [...document.querySelectorAll(".text-cobalt")];
-        const hud = els.find((e) => e.parentElement?.textContent?.includes("/ 07"));
+        const hud = els.find((e) => e.parentElement?.textContent?.includes("/ 08"));
         return hud?.textContent?.trim() ?? "";
       });
       if (current.toLowerCase() === label.toLowerCase()) break;

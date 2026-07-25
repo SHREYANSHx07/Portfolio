@@ -282,7 +282,7 @@ export function Projects() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.3em] text-cobalt">
-              <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="04 — Selected work" />
+              <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="05 — Selected work" />
             </p>
             <SplitReveal
               as="h2"

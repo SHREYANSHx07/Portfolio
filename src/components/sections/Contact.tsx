@@ -50,7 +50,7 @@ export function Contact() {
       <div className="mx-auto grid w-full max-w-6xl gap-14 md:grid-cols-2 md:items-center">
         <div>
           <p className="mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.3em] text-cobalt">
-            <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="06 — Contact" />
+            <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="07 — Contact" />
           </p>
           <SplitReveal
             as="h2"

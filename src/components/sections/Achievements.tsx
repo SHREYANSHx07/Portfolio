@@ -40,7 +40,7 @@ export function Achievements() {
     <Section id="achievements" className="px-5 py-28 sm:px-10 sm:py-40">
       <div className="mx-auto w-full max-w-6xl">
         <p className="mb-6 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.3em] text-cobalt">
-          <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="05 — Proof" />
+          <span className="h-px w-8 bg-cobalt/50" /> <ScrambleText text="06 — Proof" />
         </p>
         <SplitReveal
           as="h2"

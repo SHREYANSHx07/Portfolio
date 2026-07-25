@@ -7,6 +7,7 @@ export type SectionId =
   | "about"
   | "skills"
   | "experience"
+  | "flagship"
   | "projects"
   | "achievements"
   | "contact";
