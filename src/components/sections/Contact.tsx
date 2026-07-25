@@ -77,7 +77,7 @@ export function Contact() {
                 key="sent"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line bg-surface/70 p-10 text-center backdrop-blur"
+                className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border border-line bg-surface p-10 text-center shadow-sm"
               >
                 <div className="h-32 w-full">
                   <PaperPlaneCanvas />
@@ -102,7 +102,7 @@ export function Contact() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7 }}
-                className="space-y-5 rounded-3xl border border-line bg-surface/70 p-7 backdrop-blur sm:p-8"
+                className="space-y-5 rounded-3xl border border-line bg-surface p-7 shadow-sm sm:p-8"
               >
                 {/* honeypot */}
                 <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />

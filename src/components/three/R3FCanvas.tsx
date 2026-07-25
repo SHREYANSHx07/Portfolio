@@ -2,7 +2,7 @@
 
 import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, PerformanceMonitor } from "@react-three/drei";
+import { PerformanceMonitor } from "@react-three/drei";
 import * as THREE from "three";
 import { easing } from "maath";
 import { LightRig } from "./LightRig";
@@ -12,7 +12,6 @@ import { MorphInstances } from "./MorphInstances";
 import { DustField } from "./DustField";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
 import { useCapabilityTier } from "@/hooks/useCapabilityTier";
-import { COLORS } from "@/lib/theme";
 
 /**
  * The ONE persistent scene. Always mounted so the voxel morph journey is
@@ -105,14 +104,6 @@ export default function R3FCanvas() {
         <HeroSculpture />
         <MorphInstances />
         {tier !== "low" && <DustField />}
-        <ContactShadows
-          position={[0, -2.1, 0]}
-          opacity={0.25}
-          scale={14}
-          blur={2.8}
-          far={5}
-          color={COLORS.ink}
-        />
         {tier === "high" && <Effects intensity={1} />}
       </Canvas>
     </div>

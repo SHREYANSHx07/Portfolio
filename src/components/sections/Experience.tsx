@@ -55,7 +55,7 @@ export function Experience() {
                 </span>
 
                 <div className={i % 2 === 0 ? "sm:pr-10 sm:text-right" : "sm:col-start-2 sm:pl-10"}>
-                  <div className="rounded-2xl border border-line bg-surface/60 p-6 backdrop-blur-sm transition-shadow hover:shadow-[0_20px_60px_-30px_rgba(43,76,240,0.35)]">
+                  <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm transition-shadow hover:shadow-[0_20px_60px_-30px_rgba(43,76,240,0.35)]">
                     <div className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 ${i % 2 === 0 ? "sm:justify-end" : ""}`}>
                       <h3 className="font-display text-xl font-medium text-ink">{job.company}</h3>
                       {job.current && (
@@ -100,7 +100,7 @@ export function Experience() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-8% 0px" }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }}
-                className="group relative overflow-hidden rounded-2xl border border-line bg-surface/60 p-5 backdrop-blur-sm transition-colors hover:border-cobalt/40"
+                className="group relative overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-sm transition-colors hover:border-cobalt/40"
               >
                 <span
                   className={`mb-3 flex h-2.5 w-2.5 rounded-full ${

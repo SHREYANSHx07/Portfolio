@@ -61,7 +61,7 @@ export function Achievements() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.08 }}
-              className="rounded-2xl border border-line bg-surface/70 p-5 backdrop-blur-sm"
+              className="rounded-2xl border border-line bg-surface p-5 shadow-sm"
             >
               <p
                 className={`font-display text-4xl font-light sm:text-5xl ${
@@ -85,7 +85,7 @@ export function Achievements() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-8% 0px" }}
               transition={{ duration: 0.6, delay: i * 0.06 }}
-              className="group flex gap-4 rounded-2xl border border-line bg-surface/60 p-5 transition-colors hover:border-cobalt/40"
+              className="group flex gap-4 rounded-2xl border border-line bg-surface p-5 shadow-sm transition-colors hover:border-cobalt/40"
             >
               <span
                 className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${

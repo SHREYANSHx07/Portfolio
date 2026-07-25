@@ -164,13 +164,14 @@ function buildFormations() {
       const col = Math.floor(i / LEVELS);
       const lvl = i % LEVELS;
       const visible = lvl < Math.ceil(stats[col].height * LEVELS);
-      ach.pos.set([(col - 1.5) * 1.35, -1.15 + lvl * 0.29, 0], i * 3);
+      // z −1.7: towers live behind the content plane so cards stay readable
+      ach.pos.set([(col - 1.5) * 1.35, -0.65 + lvl * 0.29, -1.7], i * 3);
       ach.scale[i] = visible ? 0.27 : 0.001;
       setColor(ach, i, accentHex(stats[col].accent));
     } else {
       // orbiting sparks for "1000+ problems"
       const a = ((i - 4 * LEVELS) / (N - 4 * LEVELS)) * Math.PI * 2;
-      ach.pos.set([Math.cos(a) * 3, 0.4 + Math.sin(a * 2) * 0.5, -0.6], i * 3);
+      ach.pos.set([Math.cos(a) * 3.2, 0.7 + Math.sin(a * 2) * 0.5, -2.2], i * 3);
       ach.scale[i] = 0.045;
       setColor(ach, i, COLORS.coral);
     }
