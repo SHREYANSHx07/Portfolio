@@ -3,13 +3,17 @@
 import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { COLORS } from "@/lib/theme";
+import { COLORS, DARK_COLORS } from "@/lib/theme";
 import { useScrollStore } from "@/hooks/useScrollStore";
+import { useThemeStore } from "@/hooks/useTheme";
 
 /**
  * Full-page ambient particle field that PARTS around the cursor — a quiet
  * repulsion, like dust in light. Home positions are fixed; each frame every
  * particle is pushed away from the pointer's world position and eased home.
+ *
+ * In dark mode the same field reads as fireflies: cobalt-tinted, slightly
+ * larger, additively blended so each point glows against the night.
  */
 
 const COUNT = 160;
@@ -19,6 +23,7 @@ const rnd = (i: number, s: number) => fract(Math.sin(i * 12.9898 + s * 78.233) *
 export function DustField() {
   const points = useRef<THREE.Points>(null);
   const { size } = useThree();
+  const dark = useThemeStore((s) => s.theme === "dark");
 
   const home = useMemo(() => {
     const arr = new Float32Array(COUNT * 3);
@@ -75,12 +80,13 @@ export function DustField() {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.035}
-        color={COLORS.mutedInk}
+        size={dark ? 0.05 : 0.035}
+        color={dark ? DARK_COLORS.cobaltSoft : COLORS.mutedInk}
         transparent
-        opacity={0.3}
+        opacity={dark ? 0.55 : 0.3}
         sizeAttenuation
         depthWrite={false}
+        blending={dark ? THREE.AdditiveBlending : THREE.NormalBlending}
       />
     </points>
   );

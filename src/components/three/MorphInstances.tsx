@@ -3,8 +3,9 @@
 import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { COLORS, accentHex } from "@/lib/theme";
+import { accentHex, palette, type Palette, type ThemeName } from "@/lib/theme";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
+import { useThemeStore } from "@/hooks/useTheme";
 import { skills } from "@/data/skills";
 import { stats } from "@/data/achievements";
 
@@ -54,9 +55,11 @@ function setColor(f: Formation, i: number, hex: string) {
   f.color[i * 3 + 2] = c.b;
 }
 
-const PALETTE = [COLORS.ink, COLORS.cobalt, COLORS.coral];
-
-function buildFormations() {
+// Formations are rebuilt per theme: same geometry targets, different color
+// targets — the per-frame damping in useFrame turns a toggle into an organic
+// field-wide recolor instead of a snap.
+function buildFormations(C: Palette, theme: ThemeName) {
+  const PALETTE = [C.ink, C.cobalt, C.coral];
   const F: Record<string, Formation> = {};
 
   // — hero: everything hidden inside the sculpture core (right side)
@@ -64,7 +67,7 @@ function buildFormations() {
   for (let i = 0; i < N; i++) {
     hero.pos.set([2.2, -0.1, 0], i * 3);
     hero.scale[i] = 0.01;
-    setColor(hero, i, COLORS.ink);
+    setColor(hero, i, C.ink);
   }
   hero.opacity = 0;
   F.hero = hero;
@@ -94,13 +97,13 @@ function buildFormations() {
       const th = golden * i;
       sk.pos.set([-1.8 + Math.cos(th) * r * R, -0.3 + y * R, Math.sin(th) * r * R], i * 3);
       sk.scale[i] = 0.12 + skills[i].weight * 0.13;
-      setColor(sk, i, accentHex(skills[i].accent));
+      setColor(sk, i, accentHex(skills[i].accent, theme));
     } else {
       // faint dust ring around the constellation
       const a = (i / (N - SKILL_COUNT)) * Math.PI * 2;
       sk.pos.set([-1.8 + Math.cos(a) * 1.8, -0.3 + Math.sin(a * 1.7) * 1.1, -1.2], i * 3);
       sk.scale[i] = 0.03;
-      setColor(sk, i, COLORS.mutedInk);
+      setColor(sk, i, C.mutedInk);
     }
   }
   sk.opacity = 0.95;
@@ -114,7 +117,7 @@ function buildFormations() {
     const a = t * Math.PI * 6;
     ex.pos.set([Math.cos(a) * 0.9, -2 + t * 4.4, -2.6 + Math.sin(a) * 0.9], i * 3);
     ex.scale[i] = 0.055;
-    setColor(ex, i, i % 5 === 0 ? COLORS.cobalt : COLORS.mutedInk);
+    setColor(ex, i, i % 5 === 0 ? C.cobalt : C.mutedInk);
   }
   ex.opacity = 0.28;
   ex.tumble = 0.3;
@@ -126,7 +129,7 @@ function buildFormations() {
   for (let i = 0; i < N; i++) {
     const left = i % 2 === 0;
     const cx = left ? -2.4 : 2.4;
-    const base = left ? COLORS.cobalt : COLORS.coral;
+    const base = left ? C.cobalt : C.coral;
     const j = Math.floor(i / 2);
     const a = (j / (N / 2)) * Math.PI * 2;
     const rr = 1.0 + rnd(i, 9) * 0.45;
@@ -135,7 +138,7 @@ function buildFormations() {
       i * 3,
     );
     fl.scale[i] = j % 6 === 0 ? 0.1 : 0.04 + rnd(i, 11) * 0.04;
-    setColor(fl, i, j % 4 === 0 ? COLORS.ink : base);
+    setColor(fl, i, j % 4 === 0 ? C.ink : base);
   }
   fl.opacity = 0.35;
   fl.tumble = 0.5;
@@ -167,13 +170,13 @@ function buildFormations() {
       // z −1.7: towers live behind the content plane so cards stay readable
       ach.pos.set([(col - 1.5) * 1.35, -0.65 + lvl * 0.29, -1.7], i * 3);
       ach.scale[i] = visible ? 0.27 : 0.001;
-      setColor(ach, i, accentHex(stats[col].accent));
+      setColor(ach, i, accentHex(stats[col].accent, theme));
     } else {
       // orbiting sparks for "1000+ problems"
       const a = ((i - 4 * LEVELS) / (N - 4 * LEVELS)) * Math.PI * 2;
       ach.pos.set([Math.cos(a) * 3.2, 0.7 + Math.sin(a * 2) * 0.5, -2.2], i * 3);
       ach.scale[i] = 0.045;
-      setColor(ach, i, COLORS.coral);
+      setColor(ach, i, C.coral);
     }
   }
   ach.opacity = 1;
@@ -188,7 +191,7 @@ function buildFormations() {
     for (let c = 0; c < cols && k < 28; c++, k++) {
       co.pos.set([2.05 + r * 0.24, 1.5 + (c - cols / 2) * 0.22, -0.5], k * 3);
       co.scale[k] = 0.1;
-      setColor(co, k, r === 0 ? COLORS.coral : k % 3 === 0 ? COLORS.cobalt : COLORS.ink);
+      setColor(co, k, r === 0 ? C.coral : k % 3 === 0 ? C.cobalt : C.ink);
     }
   }
   for (let i = k; i < N; i++) {
@@ -198,7 +201,7 @@ function buildFormations() {
       i * 3,
     );
     co.scale[i] = 0.028;
-    setColor(co, i, COLORS.mutedInk);
+    setColor(co, i, C.mutedInk);
   }
   co.opacity = 0.75;
   co.tumble = 0.1;
@@ -223,19 +226,20 @@ export function MorphInstances() {
   const lines = useRef<THREE.LineSegments>(null);
   const { size } = useThree();
 
-  const formations = useMemo(buildFormations, []);
-  const linePairs = useMemo(buildLinePairs, []);
+  const theme = useThemeStore((s) => s.theme);
+  const dark = theme === "dark";
+  const formations = useMemo(() => buildFormations(palette(theme), theme), [theme]);
+  const linePairs = useMemo(() => buildLinePairs(), []);
 
-  // current state buffers, damped toward targets
-  const cur = useMemo(
-    () => ({
-      pos: new Float32Array(formations.about.pos), // start scattered (behind preloader)
-      scale: new Float32Array(N).fill(0.01),
-      color: new Float32Array(formations.about.color),
-      opacity: 0,
-    }),
-    [formations],
-  );
+  // current state buffers, damped toward targets — lazily created on the
+  // first frame and kept across theme rebuilds, so a toggle eases every
+  // voxel's color to the new palette instead of snapping
+  const curRef = useRef<{
+    pos: Float32Array;
+    scale: Float32Array;
+    color: Float32Array;
+    opacity: number;
+  } | null>(null);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const tmpColor = useMemo(() => new THREE.Color(), []);
@@ -254,6 +258,15 @@ export function MorphInstances() {
 
   useFrame((state, dt) => {
     if (!mesh.current) return;
+    if (!curRef.current) {
+      curRef.current = {
+        pos: new Float32Array(formations.about.pos), // start scattered (behind preloader)
+        scale: new Float32Array(N).fill(0.01),
+        color: new Float32Array(formations.about.color),
+        opacity: 0,
+      };
+    }
+    const cur = curRef.current;
     const { section, hoverSkill, skillFilter } = useScrollStore.getState();
     const f = formations[section as SectionId] ?? formations.hero;
     const t = state.clock.elapsedTime;
@@ -268,10 +281,13 @@ export function MorphInstances() {
     const highlightName = hoverSkill ?? skillFilter;
     const inSkills = section === "skills";
 
+    // the night field is livelier: stronger wobble, faster tumble
+    const motionBoost = dark ? 1.6 : 1;
+
     for (let i = 0; i < N; i++) {
       // wobble keeps formations alive
-      const wob = 0.05 + f.tumble * 0.1;
-      let tx = f.pos[i * 3] * xf + Math.sin(t * 0.7 + i * 1.7) * wob;
+      const wob = (0.05 + f.tumble * 0.1) * motionBoost;
+      const tx = f.pos[i * 3] * xf + Math.sin(t * 0.7 + i * 1.7) * wob;
       let ty = f.pos[i * 3 + 1] + Math.cos(t * 0.6 + i * 2.3) * wob;
       const tz = f.pos[i * 3 + 2];
       let ts = f.scale[i];
@@ -295,7 +311,7 @@ export function MorphInstances() {
       cur.color[i * 3 + 2] += (f.color[i * 3 + 2] - cur.color[i * 3 + 2]) * k;
 
       dummy.position.set(cur.pos[i * 3], cur.pos[i * 3 + 1], cur.pos[i * 3 + 2]);
-      const tum = f.tumble;
+      const tum = f.tumble * motionBoost;
       dummy.rotation.set(
         t * 0.4 * tum + i,
         t * (0.3 + 0.2 * tum) + i * 0.7,
@@ -331,11 +347,11 @@ export function MorphInstances() {
           metalness={0.18}
           transparent
           opacity={0}
-          envMapIntensity={0.8}
+          envMapIntensity={theme === "dark" ? 1.2 : 0.8}
         />
       </instancedMesh>
       <lineSegments ref={lines} geometry={lineGeom} visible={false}>
-        <lineBasicMaterial color={COLORS.cobalt} transparent opacity={0} />
+        <lineBasicMaterial color={palette(theme).cobalt} transparent opacity={0} />
       </lineSegments>
     </group>
   );

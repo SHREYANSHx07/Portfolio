@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useScrollStore, type SectionId } from "@/hooks/useScrollStore";
 import { profile } from "@/data/profile";
 import { cn } from "@/lib/utils";
@@ -80,15 +81,18 @@ export function Nav() {
           ))}
         </ul>
 
-        <MagneticButton strength={0.5}>
-          <a
-            href={profile.socials.email}
-            data-cursor="Say hi"
-            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-cobalt"
-          >
-            Let&apos;s talk
-          </a>
-        </MagneticButton>
+        <div className="flex items-center gap-2.5">
+          <ThemeToggle />
+          <MagneticButton strength={0.5}>
+            <a
+              href={profile.socials.email}
+              data-cursor="Say hi"
+              className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-cobalt"
+            >
+              Let&apos;s talk
+            </a>
+          </MagneticButton>
+        </div>
       </nav>
     </motion.header>
   );

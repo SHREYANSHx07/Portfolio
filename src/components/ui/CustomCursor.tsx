@@ -60,15 +60,15 @@ export function CustomCursor() {
         className="fixed left-0 top-0 h-1.5 w-1.5 rounded-full bg-ink"
         style={{ x, y, translateX: "-50%", translateY: "-50%" }}
       />
-      {/* Lagging ring */}
+      {/* Lagging ring — colors come from theme tokens so dark mode adapts */}
       <motion.div
-        className="fixed left-0 top-0 flex items-center justify-center rounded-full border border-ink/40"
+        className={`fixed left-0 top-0 flex items-center justify-center rounded-full border transition-colors ${
+          hovering ? "border-cobalt/60 bg-cobalt/10" : "border-ink/35 bg-transparent"
+        }`}
         style={{ x: ringX, y: ringY, translateX: "-50%", translateY: "-50%" }}
         animate={{
           width: hovering ? 56 : 30,
           height: hovering ? 56 : 30,
-          borderColor: hovering ? "rgba(43,76,240,0.6)" : "rgba(26,26,26,0.35)",
-          backgroundColor: hovering ? "rgba(43,76,240,0.06)" : "rgba(0,0,0,0)",
         }}
         transition={{ type: "spring", stiffness: 400, damping: 28 }}
       >

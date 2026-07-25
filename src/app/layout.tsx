@@ -58,6 +58,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Runs before paint so a saved dark preference never flashes light.
+const THEME_INIT = `(function(){try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="light")t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,8 +69,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body className="grain min-h-full bg-paper text-ink">{children}</body>
     </html>
   );

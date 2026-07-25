@@ -69,6 +69,7 @@
 }
 
 :root {
+  color-scheme: light;
   --background: #f4f1ec;
   --foreground: #1a1a1a;
   --card: #fbfaf7;
@@ -101,6 +102,67 @@
   --sidebar-accent-foreground: #1a1a1a;
   --sidebar-border: #e4dfd6;
   --sidebar-ring: #2b4cf0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Midnight editorial — dark theme. Same tokens, different world:     */
+/*  blue-black paper, luminous ink, accents brightened for contrast.   */
+/* ------------------------------------------------------------------ */
+.dark {
+  color-scheme: dark;
+
+  /* editorial tokens */
+  --color-paper: #0b0c11;
+  --color-surface: #13151d;
+  --color-ink: #ecebf2;
+  --color-muted-ink: #a09db0;
+  --color-line: #262a38;
+  --color-cobalt: #5d7bff;
+  --color-cobalt-soft: #92a5ff;
+  --color-coral: #ff6d4d;
+  --color-coral-soft: #ff9d86;
+
+  /* semantic vars (shadcn layer) */
+  --background: #0b0c11;
+  --foreground: #ecebf2;
+  --card: #13151d;
+  --card-foreground: #ecebf2;
+  --popover: #13151d;
+  --popover-foreground: #ecebf2;
+  --primary: #5d7bff;
+  --primary-foreground: #0b0c11;
+  --secondary: #1d2130;
+  --secondary-foreground: #ecebf2;
+  --muted: #1d2130;
+  --muted-foreground: #a09db0;
+  --accent: #ff6d4d;
+  --accent-foreground: #0b0c11;
+  --border: #262a38;
+  --input: #262a38;
+  --ring: #5d7bff;
+  --sidebar: #13151d;
+  --sidebar-foreground: #ecebf2;
+  --sidebar-primary: #5d7bff;
+  --sidebar-primary-foreground: #0b0c11;
+  --sidebar-accent: #1d2130;
+  --sidebar-accent-foreground: #ecebf2;
+  --sidebar-border: #262a38;
+  --sidebar-ring: #5d7bff;
+}
+
+/* Cross-fade the whole page while the theme flips (class added briefly
+   by the theme store around the toggle, then removed). */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition:
+    background-color 500ms ease,
+    border-color 500ms ease,
+    color 400ms ease,
+    fill 400ms ease,
+    stroke 400ms ease,
+    opacity 500ms ease !important;
 }
 
 @layer base {
@@ -165,6 +227,12 @@
     pointer-events: none;
     opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* dark paper: the noise is near-black — invert it so grain stays visible */
+  .dark .grain::before,
+  .dark.grain::before {
+    opacity: 0.05;
+    filter: invert(1);
   }
 }
 
