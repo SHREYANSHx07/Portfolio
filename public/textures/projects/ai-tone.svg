@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b4cf0"/>
+      <stop offset="0.6" stop-color="#6a82f5"/>
+      <stop offset="1" stop-color="#ff5a3c"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2b4cf0" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#2b4cf0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="#fbfaf7"/>
+  <rect x="0" y="0" width="1200" height="120" fill="url(#g)"/>
+  <circle cx="600" cy="440" r="240" fill="url(#r)"/>
+  <g stroke="#2b4cf0" stroke-width="2" opacity="0.5" fill="none">
+    <circle cx="600" cy="440" r="120"/>
+    <circle cx="600" cy="440" r="180"/>
+    <circle cx="600" cy="440" r="240"/>
+  </g>
+  <g fill="#1a1a1a">
+    <circle cx="600" cy="440" r="10"/>
+    <circle cx="480" cy="440" r="7"/>
+    <circle cx="720" cy="440" r="7"/>
+    <circle cx="600" cy="320" r="7"/>
+    <circle cx="600" cy="560" r="7"/>
+    <circle cx="690" cy="350" r="6"/>
+    <circle cx="510" cy="530" r="6"/>
+  </g>
+  <g fill="#ff5a3c" font-family="monospace" font-size="34" opacity="0.85">
+    <text x="440" y="720">FAISS · 10k+ vectors · &lt;100ms</text>
+  </g>
+</svg>
