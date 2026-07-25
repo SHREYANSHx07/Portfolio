@@ -1,24 +1,24 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
-import { useInViewSection } from "@/hooks/useInViewSection";
-import { useCapabilityTier } from "@/hooks/useCapabilityTier";
+import { useScrollStore } from "@/hooks/useScrollStore";
 import { skills, skillCategories } from "@/data/skills";
 import { EASE } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
-const SkillsCanvas = dynamic(
-  () => import("@/components/three/scenes/SkillsCanvas").then((m) => m.SkillsCanvas),
-  { ssr: false },
-);
-
+/**
+ * The 3D constellation itself is rendered by the persistent morph canvas —
+ * the voxels assemble into it as this section scrolls into view. The left
+ * column reserves its stage; the right chips are the controls: hover lifts a
+ * node, click filters the projects section.
+ */
 export function Skills() {
-  const { ref, inView } = useInViewSection<HTMLDivElement>();
-  const tier = useCapabilityTier();
-  const show3D = inView && tier !== "low";
+  const setHoverSkill = useScrollStore((s) => s.setHoverSkill);
+  const setSkillFilter = useScrollStore((s) => s.setSkillFilter);
+  const skillFilter = useScrollStore((s) => s.skillFilter);
 
   return (
     <Section id="skills" className="px-5 py-28 sm:px-10 sm:py-40">
@@ -33,28 +33,14 @@ export function Skills() {
         />
 
         <div className="mt-12 grid gap-10 md:grid-cols-[0.95fr_1.05fr] md:items-center">
-          {/* 3D constellation */}
-          <div ref={ref} className="relative order-2 h-[380px] md:order-1 md:h-[520px]">
-            {show3D ? (
-              <SkillsCanvas />
-            ) : (
-              <div className="flex h-full flex-wrap content-center items-center justify-center gap-2">
-                {skills.map((s) => (
-                  <span
-                    key={s.name}
-                    className="rounded-full border border-line bg-surface px-3 py-1.5 font-mono text-sm text-ink"
-                  >
-                    {s.name}
-                  </span>
-                ))}
-              </div>
-            )}
+          {/* Stage for the morphing constellation (drawn by the fixed canvas behind) */}
+          <div className="relative order-2 hidden h-[420px] md:order-1 md:block md:h-[520px]">
             <p className="pointer-events-none absolute bottom-0 left-0 font-mono text-[11px] text-muted-ink">
-              {show3D ? "drag-free · hover a node" : ""}
+              hover a skill — click to filter projects
             </p>
           </div>
 
-          {/* Category list */}
+          {/* Category list = the constellation's controls */}
           <div className="order-1 space-y-7 md:order-2">
             {skillCategories.map((cat, ci) => (
               <motion.div
@@ -71,18 +57,48 @@ export function Skills() {
                 <div className="flex flex-wrap gap-2">
                   {skills
                     .filter((s) => s.category === cat)
-                    .map((s) => (
-                      <span
-                        key={s.name}
-                        data-cursor="hover"
-                        className="rounded-lg bg-secondary px-3 py-1.5 text-sm text-ink transition-colors hover:bg-cobalt hover:text-surface"
-                      >
-                        {s.name}
-                      </span>
-                    ))}
+                    .map((s) => {
+                      const active = skillFilter === s.name;
+                      return (
+                        <button
+                          key={s.name}
+                          data-cursor="hover"
+                          onMouseEnter={() => setHoverSkill(s.name)}
+                          onMouseLeave={() => setHoverSkill(null)}
+                          onClick={() => setSkillFilter(s.name)}
+                          className={cn(
+                            "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                            active
+                              ? "bg-cobalt text-surface"
+                              : "bg-secondary text-ink hover:bg-cobalt hover:text-surface",
+                          )}
+                        >
+                          {s.name}
+                        </button>
+                      );
+                    })}
                 </div>
               </motion.div>
             ))}
+
+            <div className="flex min-h-6 items-center gap-3">
+              {skillFilter && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 font-mono text-xs text-cobalt"
+                >
+                  filtering projects by “{skillFilter}”
+                  <button
+                    onClick={() => setSkillFilter(skillFilter)}
+                    data-cursor="hover"
+                    className="rounded-full border border-cobalt/40 px-2 py-0.5 text-[10px] uppercase tracking-wider transition-colors hover:bg-cobalt hover:text-surface"
+                  >
+                    clear
+                  </button>
+                </motion.p>
+              )}
+            </div>
           </div>
         </div>
       </div>

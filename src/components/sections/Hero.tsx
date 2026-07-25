@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
+import { InteractiveLetters } from "@/components/ui/InteractiveLetters";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useScrollStore } from "@/hooks/useScrollStore";
 import { profile } from "@/data/profile";
@@ -35,12 +36,14 @@ export function Hero() {
         <h1 className="display-fluid font-display font-light text-ink">
           <span className="block overflow-hidden">
             <motion.span variants={rise} custom={0} initial="hidden" animate={anim} className="inline-block">
-              Shreyansh
+              <InteractiveLetters text="Shreyansh" />
             </motion.span>
           </span>
           <span className="block overflow-hidden">
             <motion.span variants={rise} custom={1} initial="hidden" animate={anim} className="inline-block">
-              <span className="display-serif-italic pr-2 text-cobalt">Gupta</span>
+              <span className="display-serif-italic pr-2 text-cobalt">
+                <InteractiveLetters text="Gupta" />
+              </span>
             </motion.span>
           </span>
         </h1>

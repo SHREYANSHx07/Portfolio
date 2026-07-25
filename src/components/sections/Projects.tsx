@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
   AnimatePresence,
   motion,
   useMotionValue,
+  useMotionValueEvent,
+  useScroll,
   useSpring,
   useTransform,
 } from "framer-motion";
@@ -13,10 +16,39 @@ import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useCapabilityTier } from "@/hooks/useCapabilityTier";
+import { useScrollStore } from "@/hooks/useScrollStore";
 import { projects, type Project } from "@/data/projects";
 import { EASE } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
-function TiltCard({ project, onOpen, index }: { project: Project; onOpen: () => void; index: number }) {
+const ProjectsGalleryCanvas = dynamic(
+  () =>
+    import("@/components/three/scenes/ProjectsGalleryCanvas").then(
+      (m) => m.ProjectsGalleryCanvas,
+    ),
+  { ssr: false },
+);
+
+function matchesFilter(p: Project, filter: string | null) {
+  if (!filter) return true;
+  return p.stack.some((s) => s.toLowerCase().includes(filter.toLowerCase()));
+}
+
+/* ------------------------------------------------------------------ */
+/* Fallback tilt card (mobile / low tier)                              */
+/* ------------------------------------------------------------------ */
+function TiltCard({
+  project,
+  onOpen,
+  index,
+  filter,
+}: {
+  project: Project;
+  onOpen: () => void;
+  index: number;
+  filter: string | null;
+}) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLButtonElement>(null);
   const mx = useMotionValue(0);
@@ -36,6 +68,7 @@ function TiltCard({ project, onOpen, index }: { project: Project; onOpen: () => 
   };
 
   const accent = project.accent === "coral" ? "text-coral" : "text-cobalt";
+  const matched = matchesFilter(project, filter);
 
   return (
     <motion.button
@@ -49,7 +82,14 @@ function TiltCard({ project, onOpen, index }: { project: Project; onOpen: () => 
       viewport={{ once: true, margin: "-10% 0px" }}
       transition={{ duration: 0.7, delay: index * 0.1, ease: EASE }}
       style={{ rotateX: rx, rotateY: ry, transformPerspective: 1000 }}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-line bg-surface text-left [transform-style:preserve-3d]"
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-3xl border bg-surface text-left transition-all duration-500 [transform-style:preserve-3d]",
+        matched
+          ? filter
+            ? "border-cobalt shadow-[0_0_0_3px_rgba(43,76,240,0.15),0_20px_60px_-30px_rgba(43,76,240,0.4)]"
+            : "border-line"
+          : "border-line opacity-35 saturate-50",
+      )}
     >
       <div className="relative aspect-[16/10] overflow-hidden">
         <Image
@@ -86,6 +126,9 @@ function TiltCard({ project, onOpen, index }: { project: Project; onOpen: () => 
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Detail modal                                                        */
+/* ------------------------------------------------------------------ */
 function Modal({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
     <motion.div
@@ -149,11 +192,92 @@ function Modal({ project, onClose }: { project: Project; onClose: () => void }) 
   );
 }
 
-export function Projects() {
-  const [active, setActive] = useState<Project | null>(null);
+/* ------------------------------------------------------------------ */
+/* WebGL gallery (desktop / high & mid tier): sticky scroll-scrub       */
+/* ------------------------------------------------------------------ */
+function Gallery({ onOpen }: { onOpen: (p: Project) => void }) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: wrap, offset: ["start start", "end end"] });
+  const [idx, setIdx] = useState(0);
+  const skillFilter = useScrollStore((s) => s.skillFilter);
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const next = Math.min(projects.length - 1, Math.max(0, Math.round(v * (projects.length - 1))));
+    setIdx((prev) => (prev === next ? prev : next));
+  });
+
+  const active = projects[idx];
+  const matched = matchesFilter(active, skillFilter);
 
   return (
-    <Section id="projects" className="px-5 py-28 sm:px-10 sm:py-40">
+    <div ref={wrap} className="relative h-[260vh]">
+      <div className="sticky top-0 flex h-screen flex-col justify-center">
+        <div className="relative h-[62vh]">
+          <ProjectsGalleryCanvas progress={scrollYProgress} onOpen={onOpen} />
+        </div>
+
+        {/* Active project readout */}
+        <div className="mx-auto mt-2 flex w-full max-w-3xl flex-col items-center px-6 text-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: EASE }}
+            >
+              <h3 className="font-display text-2xl font-medium text-ink sm:text-3xl">
+                {active.title}
+                {skillFilter && (
+                  <span
+                    className={cn(
+                      "ml-3 align-middle font-mono text-[10px] uppercase tracking-widest",
+                      matched ? "text-cobalt" : "text-muted-ink/60",
+                    )}
+                  >
+                    {matched ? `uses ${skillFilter}` : `no ${skillFilter}`}
+                  </span>
+                )}
+              </h3>
+              <p className="mt-1 text-sm text-muted-ink">{active.tagline}</p>
+              <button
+                onClick={() => onOpen(active)}
+                data-cursor="Open"
+                className="mt-3 rounded-full border border-ink/20 px-5 py-2 text-sm text-ink transition-colors hover:bg-ink hover:text-surface"
+              >
+                View case study
+              </button>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* progress dots */}
+          <div className="mt-5 flex items-center gap-2">
+            {projects.map((p, i) => (
+              <span
+                key={p.id}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-400",
+                  i === idx ? "w-8 bg-cobalt" : "w-1.5 bg-ink/20",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+export function Projects() {
+  const [active, setActive] = useState<Project | null>(null);
+  const tier = useCapabilityTier();
+  const reduced = useReducedMotion();
+  const skillFilter = useScrollStore((s) => s.skillFilter);
+  const useGallery = tier !== "low" && !reduced;
+
+  return (
+    <Section id="projects" className="px-5 py-28 sm:px-10 sm:pb-24 sm:pt-40">
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -167,16 +291,28 @@ export function Projects() {
             />
           </div>
           <p className="max-w-xs text-sm text-muted-ink">
-            Production backends with real constraints — auth, scale, latency and clean APIs.
+            {useGallery
+              ? "Scroll to travel the gallery — click a panel for the case study."
+              : "Production backends with real constraints — auth, scale, latency and clean APIs."}
           </p>
         </div>
+      </div>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      {useGallery ? (
+        <Gallery onOpen={setActive} />
+      ) : (
+        <div className="mx-auto mt-14 grid w-full max-w-6xl gap-6 sm:grid-cols-2">
           {projects.map((p, i) => (
-            <TiltCard key={p.id} project={p} index={i} onOpen={() => setActive(p)} />
+            <TiltCard
+              key={p.id}
+              project={p}
+              index={i}
+              filter={skillFilter}
+              onOpen={() => setActive(p)}
+            />
           ))}
         </div>
-      </div>
+      )}
 
       <AnimatePresence>
         {active && <Modal project={active} onClose={() => setActive(null)} />}

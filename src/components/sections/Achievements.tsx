@@ -1,19 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Section } from "@/components/ui/Section";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { SplitReveal } from "@/components/ui/SplitReveal";
-import { useInViewSection } from "@/hooks/useInViewSection";
-import { useCapabilityTier } from "@/hooks/useCapabilityTier";
 import { stats, achievements } from "@/data/achievements";
-
-const StatTowersCanvas = dynamic(
-  () => import("@/components/three/scenes/StatTowersCanvas").then((m) => m.StatTowersCanvas),
-  { ssr: false },
-);
 
 function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -44,10 +36,6 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
 }
 
 export function Achievements() {
-  const { ref, inView } = useInViewSection<HTMLDivElement>();
-  const tier = useCapabilityTier();
-  const show3D = inView && tier !== "low";
-
   return (
     <Section id="achievements" className="px-5 py-28 sm:px-10 sm:py-40">
       <div className="mx-auto w-full max-w-6xl">
@@ -60,10 +48,9 @@ export function Achievements() {
           className="font-display text-3xl font-light leading-[1.1] text-ink sm:text-5xl"
         />
 
-        {/* 3D towers */}
-        <div ref={ref} className="relative mt-10 h-[300px] sm:h-[380px]">
-          {show3D && <StatTowersCanvas />}
-        </div>
+        {/* Stage for the voxel stat towers (drawn by the fixed morph canvas) */}
+        <div className="relative mt-10 h-[280px] sm:h-[360px]" aria-hidden />
+
 
         {/* Stat readouts */}
         <div className="-mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
